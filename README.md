@@ -9,6 +9,64 @@ Lean reproduction code for my best ANNITIA Data Challenge 2026 submission:
 The solution predicts major hepatic events and all-cause mortality in synthetic
 longitudinal MASLD patient records.
 
+## Core Idea
+
+This project treats a tabular clinical survival problem as more than a
+spreadsheet modeling task. The strongest part of the solution is a GPT-OSS
+HeLM-style branch that serializes each patient's longitudinal biomarker history
+into compact clinical text, asks a reasoning LLM to produce endpoint-specific
+risk scores, and then uses those scores as an orthogonal ranking signal in a
+survival ensemble.
+
+The LLM is not used as a chatbot wrapper around the model. It acts as a learned
+clinical pattern recognizer over irregular tabular trajectories: rising enzymes,
+falling platelets, fibrosis-test dynamics, cardiometabolic comorbidities, and
+endpoint-specific risk cues that tree models may compress away. The final gain
+comes from combining that clinical-reasoning signal with strong survival models,
+not from replacing classical modeling.
+
+## Why GPT-OSS Was Useful
+
+The base model is deliberately strong and conventional: XGBoost AFT plus
+CatBoost SurvivalAft on leakage-safe engineered longitudinal features. GPT-OSS
+adds value because it makes a different kind of error. Its risk rankings were
+weak as a standalone submission, but sufficiently different from the tabular
+base to improve the final rank ensemble.
+
+Key design choices:
+
+- Patient records are converted from wide longitudinal tables into clinically
+  readable summaries.
+- Hepatic-event risk and death risk are scored with split-endpoint prompts.
+- GPT-OSS scores are treated as monotonic rankings, not calibrated
+  probabilities.
+- Rank blending is used because leaderboard metric is C-index, so ordering
+  matters more than absolute scale.
+
+This is the research idea I would emphasize: foundation models can be useful for
+structured medical prediction when they are used as reasoning-based feature or
+ranking generators, then disciplined by survival modeling, leakage controls,
+and validation.
+
+## Research Fit
+
+For a PhD application, especially to a lab working on machine learning for
+healthcare such as van der Schaar Lab, this project demonstrates the kind of
+questions I want to work on:
+
+- How can foundation models help with tabular and longitudinal EHR-style data,
+  not just text or images?
+- When should an LLM be a predictor, a representation generator, or an
+  ensemble-diversity source?
+- How do we combine clinical priors, survival analysis, and modern foundation
+  models without leaking outcome information?
+- How do we evaluate a high-capacity clinical reasoning signal when standalone
+  accuracy is weaker than its value inside a robust ensemble?
+
+The submission is therefore a compact example of clinically grounded ML:
+survival modeling, longitudinal feature engineering, foundation-model reasoning,
+and careful competition integrity in one pipeline.
+
 ## What Is Kept
 
 ```text
