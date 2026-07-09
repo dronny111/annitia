@@ -15,11 +15,7 @@ Usage:
 
 from __future__ import annotations
 
-# CRITICAL ordering: torch/MPS must initialize BEFORE CatBoost's BLAS libraries
-# to avoid segfault 139 (same issue documented in ablation_image_backbones.py).
-# But doing BOTH torch-MPS preinit AND heavy CatBoost/XGBoost fits in the same
-# process also segfaults. So for the --benchmark path (pure tree models, no
-# fine-tuning) we skip the MPS preinit via the ANNITIA_SKIP_MPS env var.
+
 import os
 import sys
 
