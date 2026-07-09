@@ -1,6 +1,7 @@
 catboost
 numpy
 pandas
+requests
 scikit-learn
 scikit-survival
 scipy

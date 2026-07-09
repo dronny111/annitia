@@ -15,6 +15,7 @@ longitudinal MASLD patient records.
 scripts/
   push_score_allout.py              # 10-seed XGBoost AFT + CatBoost base
   ablation_finetune_efficientnet.py # EfficientNet-B0 image/tabular fine-tune
+  annitia_helm_submit.py            # GPT-OSS/HeLM risk scoring via Ollama
   helm_gptoss_blend_v2.py           # rank-blend utility for final ensemble
   feature_revolution.py             # engineered clinical feature matrix
   annitia_longitudinal_features.py  # longitudinal summaries and NIT features
@@ -49,6 +50,18 @@ EfficientNet-B0 fine-tune cell used in the final blend:
 
 ```bash
 python scripts/ablation_finetune_efficientnet.py --cell cox-sgd-none-fuse
+```
+
+GPT-OSS split-endpoint HeLM scores:
+
+```bash
+ollama serve
+ollama pull gpt-oss:120b-cloud
+python scripts/annitia_helm_submit.py \
+  --model gpt-oss:120b-cloud \
+  --provider ollama \
+  --split-endpoints \
+  --delay 0
 ```
 
 Two-stage final rank blend:
