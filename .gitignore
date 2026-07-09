@@ -1,0 +1,31 @@
+.DS_Store
+__pycache__/
+*.py[cod]
+.ipynb_checkpoints/
+
+# Local environments
+.env
+.venv/
+venv/
+.conda/
+
+# Official challenge data and generated artifacts
+data/DB-*.csv
+*.csv
+*.tsv
+*.npy
+*.npz
+*.pkl
+*.joblib
+*.model
+*.cbm
+artifacts/
+image_data/
+qualitative_assets/
+annitia_submission_package*/
+submission*/
+run.log
+autoannitia_results.tsv
+
+# Quarantined reference material recovered locally but not portfolio-owned
+reference_archive/

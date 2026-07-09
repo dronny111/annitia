@@ -1,0 +1,15 @@
+To defeat the bias of a model relying too heavily on the most recent measurements (referred to in the literature as a form of sampling bias in dynamic survival analysis), you should implement an **augmentation strategy** during model training. 
+
+In the ANNITIA challenge, patients have variable-length time series of repeated clinical and biomarker measurements. If you train a dynamic model (like Dynamic-DeepHit) using only the full, original time series—where the last time step is the one immediately preceding a major liver event, death, or censoring—the model can be "fooled" into a severe sampling bias. It might learn to rely exclusively on the very last measurement (for instance, a sudden, late-stage spike in FibroScan or AST scores) and fail to make accurate predictions during earlier clinical visits.
+
+To prevent the model from exclusively relying on this "recency" effect, you must train it to mimic the real-world scenario where predictions are continually updated as new data streams in. You can do this by **treating each patient's time series as multiple "augmented" training points**. 
+
+For a patient with a time series of $M_i$ check-ups, you should augment the data as follows:
+*   **Point 1:** Feed the model only the 1st time step and force it to predict the time until the liver event or death starting from that 1st timestamp.
+*   **Point 2:** Feed the model the 1st and 2nd time steps, predicting the outcome starting from the 2nd timestamp.
+*   **...**
+*   **Point $M_i$:** Feed the model the entire history of all $M_i$ time steps and predict the outcome starting from the final timestamp (this represents the original, non-augmented data point).
+
+**Implementation tip:** You can either use all $M_i$ augmented points in your training set, or, to save computational power, randomly choose a different augmented time step for each patient during every neural network training epoch. 
+
+By forcing the model to make predictions starting from early and intermediate time steps, it learns to predict MASLD disease progression across the patient's entire history rather than just relying on the most recent, late-stage indicators.
