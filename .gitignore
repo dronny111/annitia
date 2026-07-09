@@ -26,6 +26,7 @@ annitia_submission_package*/
 submission*/
 run.log
 autoannitia_results.tsv
+ablation_finetune_efficientnet_results.csv
 
 # Quarantined reference material recovered locally but not portfolio-owned
 reference_archive/

@@ -1,11 +1,10 @@
 catboost
-jupyter
-matplotlib
 numpy
 pandas
 scikit-learn
 scikit-survival
 scipy
-seaborn
-shap
+torch
+torchvision
+timm
 xgboost

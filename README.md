@@ -1,96 +1,82 @@
-# ANNITIA MASLD Survival Modeling
+# ANNITIA 2026 Final Submission Code
 
-Recovered research code and notes for the ANNITIA Data Challenge 2026, focused on
-AI-based risk stratification for metabolic dysfunction-associated steatotic liver
-disease (MASLD).
-
-The project predicts two patient-level survival endpoints:
-
-- major hepatic events
-- all-cause mortality
-
-The challenge score is a weighted C-index:
-
-```text
-0.7 * C-index_hepatic + 0.3 * C-index_death
-```
-
-## Highlights
-
-- Longitudinal feature engineering from wide clinical visit data.
-- Leakage-aware post-event visit masking.
-- Clinical markers and thresholds including FibroScan, FibroTest, APRI, FIB-4,
-  platelet thresholds, transaminase elevation, and visit-pattern summaries.
-- Survival ensembles using XGBoost AFT and CatBoost SurvivalAft.
-- Patient-level stratified cross-validation.
-- Recovered experiment notes for tabular, EfficientNet-style image, HeLM/LLM,
-  and rank-blending approaches.
-
-Recovered run notes record:
+Lean reproduction code for my best ANNITIA Data Challenge 2026 submission:
 
 - public leaderboard score: `0.90364`
-- 10-fold tabular CV: combined `0.9474`, hepatic `0.9556`, death `0.9282`
-- final blend recipe: tabular survival ensemble + EfficientNet-B0 finetune +
-  HeLM rank blend
+- final file: `submission_helm_s1w50_base_w15.csv`
+- metric: `0.7 * C-index_hepatic + 0.3 * C-index_death`
 
-Those numbers come from recovered local history and session checkpoints after
-the original project folder was deleted. They have not been rerun in this
-reconstructed checkout because the official challenge data and final artifacts
-are not included.
+The solution predicts major hepatic events and all-cause mortality in synthetic
+longitudinal MASLD patient records.
 
-## Main Files
+## What Is Kept
 
-- `annitia_pipeline.py` - end-to-end survival pipeline.
-- `annitia_longitudinal_features.py` - reusable longitudinal feature builder.
-- `feature_revolution.py` - ablation-oriented feature engineering pipeline.
-- `tools/autoannitia_runner.py` - autonomous experiment runner recovered from
-  Copilot session files.
-- `recovery_notes/` - recovered implementation and final-submission checkpoints.
-- `RECOVERY_MANIFEST.json` - provenance for every restored file.
+```text
+scripts/
+  push_score_allout.py              # 10-seed XGBoost AFT + CatBoost base
+  ablation_finetune_efficientnet.py # EfficientNet-B0 image/tabular fine-tune
+  helm_gptoss_blend_v2.py           # rank-blend utility for final ensemble
+  feature_revolution.py             # engineered clinical feature matrix
+  annitia_longitudinal_features.py  # longitudinal summaries and NIT features
+  validate_submission.py            # simple CSV contract check
+```
 
-## Data Policy
+Raw challenge data, generated submissions, model artifacts, webapp assets, and
+exploratory notes are intentionally excluded.
 
-Raw challenge CSVs, generated submissions, trained models, large artifacts, and
-third-party reference notebooks are intentionally not tracked in git. Place
-official ANNITIA CSV files under `data/` when running locally:
+## Expected Data
+
+Place the official challenge CSVs under `data/`:
 
 ```text
 data/
-  DB-*.csv
+  DB-1773398340961.csv      # train, with outcome columns
+  DB-1773398340961 (1).csv  # test
 ```
 
-The repository includes a starter notebook snapshot under `data/`, but not the
-official train/test CSVs.
+Generated/frozen artifacts used by the final blend should live under
+`artifacts/` when reproducing the exact final submission.
 
-## Quick Start
+## Reproduce
 
-Create an environment with the dependencies in `requirements.txt`, add the
-official challenge CSV files to `data/`, then run:
+Base tabular submission:
 
 ```bash
-python annitia_pipeline.py --cv-only
-python feature_revolution.py --variant engineered_clinical_interactions
+python scripts/push_score_allout.py --submit --quick --no-gbsa
 ```
 
-To generate a challenge submission when the official test CSV is present:
+EfficientNet-B0 fine-tune cell used in the final blend:
 
 ```bash
-python annitia_pipeline.py --submit-only
+python scripts/ablation_finetune_efficientnet.py --cell cox-sgd-none-fuse
 ```
 
-## Recovery Notes
+Two-stage final rank blend:
 
-This repository was reconstructed from:
+```bash
+python scripts/helm_gptoss_blend_v2.py \
+  --base-path artifacts/submission_finetune_cox-sgd-none-fuse_standalone.csv \
+  --helm-path artifacts/submission_helm_oll-gpt-oss-120b-cloud_split.csv \
+  --weights 0.50 \
+  --tag splithelm_effb0
 
-- VS Code local history snapshots
-- Copilot session checkpoints
-- Gemini project traces
+python scripts/helm_gptoss_blend_v2.py \
+  --base-path artifacts/submission_allout_10seed_50_50.csv \
+  --helm-path submission_helm_splithelm_effb0_w50.csv \
+  --weights 0.15 \
+  --tag s1w50_base
+```
 
-The reconstruction prioritizes authored code, reproducible methodology, and
-research documentation suitable for a public portfolio. Files likely to be
-third-party reference material were restored locally under `reference_archive/`
-but are ignored by git.
+Validate a produced submission:
 
-## License
+```bash
+python scripts/validate_submission.py submission_helm_s1w50_base_w15.csv
+```
 
-MIT License. See `LICENSE`.
+## Integrity
+
+- Patient-level splits only.
+- Per-endpoint post-event visit masking before feature extraction.
+- Train-fold-only imputation and missingness filtering.
+- Label proxies such as `follow_up_years` and `Age_delta` are dropped.
+- No raw challenge data or generated submissions are committed.
