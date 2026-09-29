@@ -2,7 +2,16 @@ stage,model,c_hep,c_death,weighted
 cv,xgb (10 seeds),0.9530,0.9210,0.9434
 cv,cat (10 seeds),0.9592,0.9266,0.9494
 cv,xgb + cat rank blend,0.9594,0.9288,0.9502
+cv_clean,"xgb (10 seeds), window-free",0.9188,0.8971,0.9123
+cv_clean,"cat (10 seeds), window-free",0.8736,0.8888,0.8782
+cv_clean,"xgb + cat rank blend, window-free",0.9038,0.8977,0.9020
 proxy,follow-up span alone (leak probe),0.9584,0.9685,0.9614
-cv_clean,"xgb (10 seeds), window-free",0.9214,0.8916,0.9124
-cv_clean,"cat (10 seeds), window-free",0.8807,0.8890,0.8832
-cv_clean,"xgb + cat rank blend, window-free",0.9094,0.8964,0.9055
+cv_helm,window-free base,0.9038,0.8977,0.9020
+cv_helm,"GPT-OSS HeLM alone, window-free text",0.7524,0.7326,0.7465
+cv_helm,base + GPT-OSS at weight 0.07,0.9026,0.8937,0.8999
+cv_helm_medgemma_split,window-free base,0.9038,0.8977,0.9020
+cv_helm_medgemma_split,"GPT-OSS HeLM alone, window-free text",0.5512,0.6796,0.5897
+cv_helm_medgemma_split,base + GPT-OSS at weight 0.07,0.8999,0.8939,0.8981
+cv_helm_medgemma_joint,window-free base,0.9038,0.8977,0.9020
+cv_helm_medgemma_joint,"GPT-OSS HeLM alone, window-free text",0.6092,0.6312,0.6158
+cv_helm_medgemma_joint,base + GPT-OSS at weight 0.07,0.9015,0.8942,0.8993

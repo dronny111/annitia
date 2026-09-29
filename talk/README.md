@@ -1,8 +1,10 @@
 # The Model That Lost Alone and Won the Ensemble: a talk with a live Jupyter walkthrough
 
-A 50-minute technical talk on this repository's ANNITIA 2026 solution. Its argument: a reasoning
-LLM that reads a patient's record as clinical text is a weak survival model on its own, but it
-improves a strong tabular ensemble because its mistakes are different.
+A 50-minute technical talk on this repository's ANNITIA 2026 solution. A reasoning LLM that reads
+a patient's record as clinical text is a weak survival model on its own. On the leaderboard it
+seemed to improve a strong tabular ensemble, because its mistakes differ. The talk shows why that
+was plausible, then tests it with five false-positive gate criteria and a leak-free CV replication
+on the training set, where the gain does not hold.
 
 **Data safety.** The talk runs on a seeded synthetic cohort (`synthetic.py`) and our own aggregate
 scores (`data/*.csv`: model names and C-index values only). `guard.py` makes any attempt to open a
@@ -33,8 +35,9 @@ say so. To add them:
    `--seeds 3` for a quicker run. It runs the repo's CV twice: as the pipeline runs it, and
    window-free. The window-free run drops every feature computed over the observation window,
    such as visit counts, missing rates and age summaries other than first-visit age. The pipeline
-   keeps `Age_first` and `Age_last`, and for censored patients their difference is the follow-up
-   time. A leak-probe row scores that span alone. If `ablation_finetune_efficientnet_results.csv` exists in the repo
+   used to keep `Age_first` and `Age_last`, and for censored patients their difference is the
+   follow-up time. A leak-probe row scores that span alone. The loader now drops these features by
+   default, and the export reproduces the old behaviour for its "as run" rows. If `ablation_finetune_efficientnet_results.csv` exists in the repo
    root, its `cox-sgd-none-fuse` row is included.
 2. `talk/data/leaderboard.csv` holds eight hand-picked leaderboard milestones from
    `talk/data/CHALLENGE_SUBS.md`, the full upload history. Each one maps to this repo's pipeline.

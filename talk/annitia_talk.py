@@ -26,7 +26,7 @@ import sys, csv, io, contextlib
 from IPython.display import display
 from pathlib import Path
 import numpy as np, pandas as pd, matplotlib.pyplot as plt
-from scipy.stats import spearmanr
+from scipy.stats import spearmanr, binomtest
 from sksurv.metrics import concordance_index_censored
 ROOT = Path.cwd().parent if Path.cwd().name == "talk" else Path.cwd()
 for p in ("scripts", "talk"):
@@ -53,8 +53,9 @@ C = S.cohort(2000, seed=0)                          # the synthetic cohort used 
 # %% [markdown] slideshow={"slide_type": "slide"}
 # ## The argument, in one sentence
 # A reasoning LLM that reads a patient's history as clinical text is a **weak** survival model
-# on its own. It still improves a strong tabular ensemble, because it makes **different
-# mistakes**.
+# on its own. On the leaderboard it seemed to improve a strong tabular ensemble, because it makes
+# **different mistakes**. This talk shows why that was plausible, and how a leak-free
+# replication overturned it.
 #
 # 1. **Objective:** the metric only sees order, so we blend ranks.
 # 2. **Data:** wide, irregular, censored records.
@@ -90,7 +91,8 @@ plt.show()
 
 # %% [markdown]
 # On the leaderboard, GPT-OSS alone scored **0.792**, far below the tabular base at **0.894**.
-# Blended at a small rank weight, it gave this pipeline's best score, **0.904**.
+# Blended at a small rank weight, it gave this pipeline's best score, **0.904**. Section 8 tests
+# whether that gain was real.
 
 # %% [markdown] slideshow={"slide_type": "slide"}
 # ## 1 · Objective: the metric only sees order
@@ -206,9 +208,9 @@ print("baseline visit only:");                        fit_and_score([c for c in 
 # last values, slopes and even whether a slope exists all encode how long follow-up lasted. The
 # baseline-only model sits just under the truth, as an honest model should.
 #
-# The real pipeline drops `follow_up_years` and `Age_delta` and masks visits after the event. But it
-# keeps `Age_first` and `Age_last`, and their difference *is* the follow-up time. Section 8 shows
-# what that did to our CV. **Transfer:** compare every model against an oracle or a baseline-only model.
+# The pipeline masked visits after the event and dropped `follow_up_years` and `Age_delta`. But it
+# kept `Age_first` and `Age_last`, and their difference *is* the follow-up time. Section 8 shows
+# what that did to our CV. The loader now drops every window feature. **Transfer:** compare every model against an oracle or a baseline-only model.
 
 # %% [markdown] slideshow={"slide_type": "slide"}
 # ## 4 · Serializing a patient for an LLM
@@ -493,14 +495,45 @@ else:
 # flag. The leaderboard gap alone could not show this: one public score is too noisy. The leak
 # probe and the ceiling did. With about five events per fold, a perfect fold of 1.000 is noise too.
 #
-# **The fix:** drop every feature computed over the observation window, 24 in all. The same base
-# then scores **0.906** in CV, below the red flag and close to the leaderboard's 0.894.
+# **The fix:** drop every feature computed over the observation window, 26 in all. The same base
+# then scores **0.902** in CV, below the red flag and close to the leaderboard's 0.894.
+
+# %% [markdown] slideshow={"slide_type": "subslide"}
+# ### Another decision the leaky gate approved: the 50/50 blend
+# The pipeline blends XGBoost and CatBoost 50/50 because the CV as run favoured it. Without the
+# leak, XGBoost alone looks better. Is that a finding, or a second false positive?
+
+# %%
+by = {(r["stage"], r["model"]): float(r["weighted"]) for r in cv}
+for stage, sfx, label in (("cv", "", "CV as run"), ("cv_clean", ", window-free", "window-free CV")):
+    vals = [by.get((stage, m + sfx)) for m in ("xgb (10 seeds)", "cat (10 seeds)", "xgb + cat rank blend")]
+    if all(v is not None for v in vals):
+        print(f"{label:15s} XGB {vals[0]:.4f} | Cat {vals[1]:.4f} | blend {vals[2]:.4f}")
+wf = [r for r in csv_rows("cv_folds.csv") if r["comparison"] == "xgb_only_vs_blend"]
+if wf:
+    d = {ep: np.array([float(r["delta"]) for r in wf if r["endpoint"] == ep]) for ep in ("hep", "death")}
+    for ep, name in (("hep", "hepatic"), ("death", "death")):
+        k = int((d[ep] > 0).sum())
+        print(f"XGB beats blend in {k}/10 {name} folds (p = {binomtest(k, 10, 0.5, alternative='greater').pvalue:.2f})")
+    wd = 0.7 * d["hep"] + 0.3 * d["death"]
+    views = [("fold mean", wd.mean(), wd.std(ddof=1) / np.sqrt(len(wd)))]
+    boot = {r["comparison"]: r for r in csv_rows("cv_tests.csv")}.get("xgb_only_vs_blend")
+    if boot:
+        views.append(("patient bootstrap", float(boot["estimate"]), float(boot["se"])))
+    for name, est, se in views:              # K = 3: picked among XGB, Cat and blend after seeing CV
+        print(f"{name:17s} {est:+.4f} ± {se:.4f} ({est / se:.1f} SE) -> {G.verdict(est, se, 3, np.inf, False)}")
+
+# %% [markdown]
+# **Suggestive, not yet credible.** The leaky CV approved 50/50 on a margin of 0.0008. Without
+# the leak, XGBoost looks better, but the evidence is mixed: the fold mean clears the bars, the
+# patient bootstrap does not, and XGBoost wins only about half the folds. We also picked this
+# comparison after seeing the scores. Confirm it on data the choice never saw before switching.
+
 
 # %% [markdown] slideshow={"slide_type": "subslide"}
 # ### A cheap replication check
 
 # %%
-from scipy.stats import binomtest
 tab, llm = S.rankers(cal_syn[0], seed=21, shared=0.1)
 folds = np.array_split(np.random.default_rng(21).permutation(len(tab)), 10)
 blend = 0.93 * _rank01(tab) + 0.07 * _rank01(llm)
@@ -508,8 +541,67 @@ d = [cidx(ev_s[f], t_s[f], blend[f]) - cidx(ev_s[f], t_s[f], tab[f]) for f in fo
 k = sum(x > 0 for x in d)
 print(f"blend beats base in {k} of 10 folds; sign-test p = {binomtest(k, 10, 0.5, alternative='greater').pvalue:.3f}")
 
+# %% [markdown] slideshow={"slide_type": "subslide"}
+# ### The real replication: GPT-OSS inside the window-free CV
+# GPT-OSS scored all 1,253 training patients zero-shot. Its text drops follow-up length and
+# post-event visits, like the base. The blend weight, **0.07**, is the submitted one, fixed in advance.
+
+# %%
+helm = {r["model"]: r for r in cv if r["stage"] == "cv_helm"}
+fold_rows = [r for r in csv_rows("cv_folds.csv") if r["comparison"] == "helm_blend_vs_base"]
+if helm:
+    short = {"window-free base": "base", "GPT-OSS HeLM alone, window-free text": "GPT-OSS alone",
+             "base + GPT-OSS at weight 0.07": "base + GPT-OSS"}
+    for name, r in helm.items():
+        print(f"{short.get(name, name):15s} {float(r['weighted']):.4f}"
+              f" (hep {float(r['c_hep']):.3f}, death {float(r['c_death']):.3f})")
+    for ep, name in (("hep", "hepatic"), ("death", "death")):
+        d = np.array([float(r["delta"]) for r in fold_rows if r["endpoint"] == ep])
+        k = int((d > 0).sum())
+        print(f"{name:8s} blend wins {k}/{len(d)} folds, mean {d.mean():+.4f}"
+              f" ± {d.std(ddof=1) / np.sqrt(len(d)):.4f}")
+    b, l = float(helm["window-free base"]["weighted"]), float(helm["GPT-OSS HeLM alone, window-free text"]["weighted"])
+    s_b, s_l = sig(b), sig(l)
+    print("predicted gain: " + " | ".join(
+        f"r={r} {G.predicted_gain(CAL['hep'], s_b, s_l, r, 0.07)[0]:+.4f}" for r in (0.0, 0.3, 0.5)))
+else:
+    print("run talk/helm_train_scores.py, then talk/helm_cv.py, to fill this slide")
+
 # %% [markdown]
-# Our HeLM scores were never run on the training set, so **no LLM gain here has a CV replicate**.
+# **It does not replicate.** On 1,253 patients, the blend loses to the base in most folds. The
+# mechanism predicts exactly this if the LLM's errors correlate with the base's at about 0.5. At
+# this gap in standalone skill, a weak ranker helps only when its errors are nearly independent.
+# *Differences from the submission: window-free text, the corrected post-event masking, and the
+# tabular base in place of the EfficientNet base.*
+
+# %% [markdown] slideshow={"slide_type": "subslide"}
+# ### One prompt or two? Joint prediction of both endpoints
+# The split prompts ask about each endpoint alone. A joint prompt asks for both risks at once, so
+# the model can reason about competing risks. Same text, same weight 0.07, same folds. GPT-OSS and
+# MedGemma 1.5 run with thinking off; Nemotron 3 Super runs with reasoning on.
+
+# %%
+tests = {r["comparison"]: r for r in csv_rows("cv_tests.csv")}
+runs = [("GPT-OSS split", "cv_helm", "helm_blend_vs_base"), ("GPT-OSS joint", "cv_helm_joint", "helm_joint_blend_vs_base")]
+runs += [(f"{label} {mode}", f"cv_helm_{name}_{mode}", f"helm_{name}_{mode}_blend_vs_base")
+         for name, label in (("nemotron", "Nemotron"), ("medgemma", "MedGemma")) for mode in ("split", "joint")]
+shown = 0
+for label, stage, key in runs:
+    r = {x["model"]: float(x["weighted"]) for x in cv if x["stage"] == stage}
+    if r and key in tests:
+        est, se = float(tests[key]["estimate"]), float(tests[key]["se"])
+        print(f"{label:13s} alone {r['GPT-OSS HeLM alone, window-free text']:.4f}"
+              f" | blend - base {est:+.4f} ± {se:.4f} ({est / se:+.1f} SE)")
+        shown += 1
+for key, label in (("helm_joint_vs_split_blend", "GPT-OSS joint - split"),
+                   ("helm_nemotron_joint_vs_split_blend", "Nemotron joint - split"),
+                   ("helm_medgemma_joint_vs_split_blend", "MedGemma joint - split")):
+    if key in tests:
+        est, se = float(tests[key]["estimate"]), float(tests[key]["se"])
+        print(f"{label:22s} {est:+.4f} ± {se:.4f} ({est / se:+.1f} SE)")
+if shown <= 1:
+    print("run talk/helm_train_scores.py for the joint, Nemotron and MedGemma variants, then talk/helm_cv.py")
+
 
 # %% [markdown] slideshow={"slide_type": "subslide"}
 # ### The scorecard: our own leaderboard decisions
@@ -530,27 +622,30 @@ for name, gain, k, c_a, c_b, w in decisions:
     else:
         se, mech = se_ref, np.inf                  # no mechanism model: generic paired SE
     v = G.verdict(gain, se, k, mech, replicated=False)
+    rep = {r["comparison"]: r for r in csv_rows("cv_tests.csv")}.get("helm_blend_vs_base")
+    if name.startswith("GPT-OSS") and rep and float(rep["estimate"]) <= 0:
+        v = "failed replication in CV"
     mech_txt = "n/a" if np.isinf(mech) else f"{mech:+.4f}"
     md += (f"| {name} | {gain:+.4f} | {se:.4f} | {gain / se:.1f} | {k} | {G.null_max_gain(se, k):.4f}"
            f" | {mech_txt} | **{v}** |\n")
 display(Markdown(md))
 
 # %% [markdown]
-# **The honest reading:** with real event rates, every leaderboard decision falls within noise.
-# Our CV as run failed the ceiling check, and the window-free CV now passes it. The mechanism
-# supports the direction of the LLM gains, not their size. To make the claim credible, score HeLM
-# on the window-free training folds, fix weights in advance, and spend fewer uploads.
+# **The honest reading:** with real event rates, every leaderboard decision falls within noise,
+# and the one we could replicate failed. Our CV as run failed the ceiling check, and the
+# window-free CV passes it. The weak-ranker mechanism is real. Here, the LLM's errors were too
+# close to the base's for it to help.
 
 # %% [markdown] slideshow={"slide_type": "slide"}
 # ## 9 · Limits and honest reporting
 # - **Uncalibrated:** the LLM scores rank patients. They are not risks, and are never reported as such.
 # - **Cost and drift:** two calls per patient, and a hosted model can change under you. Store the
 #   raw scores and the model tag with each run.
-# - **Unmeasured locally:** GPT-OSS was never run on the training set, so its blend gain has no CV
-#   estimate. Label it as a leaderboard number, not a validated one.
+# - **Replicated and failed:** scored on the training set, GPT-OSS at weight 0.07 slightly lowers
+#   the leak-free CV. Its leaderboard gain was noise on 127 patients.
 # - **Small gate:** 127 public patients hold only a handful of hepatic events, so they resolve
 #   only gains larger than most of ours.
-# - **Leaky CV:** the pipeline's CV reads follow-up length. Quote the window-free CV, 0.906, instead.
+# - **Leaky CV:** the pipeline's CV reads follow-up length. Quote the window-free CV, 0.902, instead.
 
 # %% [markdown] slideshow={"slide_type": "slide"}
 # ## Generalising the idea

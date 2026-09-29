@@ -7435,7 +7435,7 @@ main {
 <main>
 <div class="reveal">
 <div class="slides"><section><section>
-<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=446da3ef">
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=cfc8d1dd">
 <div class="jp-Cell-inputWrapper" tabindex="0">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -7450,15 +7450,16 @@ record appears in this notebook, and a guard enforces that.</em></p>
 </div>
 </div>
 </div></section></section><section><section>
-<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=7469f18c">
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=cec1d6bb">
 <div class="jp-Cell-inputWrapper" tabindex="0">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
 <h2 id="The-argument,-in-one-sentence">The argument, in one sentence<a class="anchor-link" href="#The-argument,-in-one-sentence">¶</a></h2><p>A reasoning LLM that reads a patient's history as clinical text is a <strong>weak</strong> survival model
-on its own. It still improves a strong tabular ensemble, because it makes <strong>different
-mistakes</strong>.</p>
+on its own. On the leaderboard it seemed to improve a strong tabular ensemble, because it makes
+<strong>different mistakes</strong>. This talk shows why that was plausible, and how a leak-free
+replication overturned it.</p>
 <ol>
 <li><strong>Objective:</strong> the metric only sees order, so we blend ranks.</li>
 <li><strong>Data:</strong> wide, irregular, censored records.</li>
@@ -7473,7 +7474,7 @@ mistakes</strong>.</p>
 </div>
 </div>
 </div>
-</div></section></section><section><section><div class="jp-Cell jp-CodeCell jp-Notebook-cell" id="cell-id=4fc1e49e">
+</div></section></section><section><section><div class="jp-Cell jp-CodeCell jp-Notebook-cell" id="cell-id=ccb218c7">
 <div class="jp-Cell-inputWrapper" tabindex="0">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -7519,19 +7520,20 @@ mistakes</strong>.</p>
 </div>
 </div>
 </div>
-<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=f20803c7">
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=596b360d">
 <div class="jp-Cell-inputWrapper" tabindex="0">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
 <p>On the leaderboard, GPT-OSS alone scored <strong>0.792</strong>, far below the tabular base at <strong>0.894</strong>.
-Blended at a small rank weight, it gave this pipeline's best score, <strong>0.904</strong>.</p>
+Blended at a small rank weight, it gave this pipeline's best score, <strong>0.904</strong>. Section 8 tests
+whether that gain was real.</p>
 </div>
 </div>
 </div>
 </div></section></section><section><section>
-<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=85aa8a22">
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=90941ae8">
 <div class="jp-Cell-inputWrapper" tabindex="0">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -7543,7 +7545,7 @@ earlier event get the higher risk? Scale, calibration and units are invisible to
 </div>
 </div>
 </div>
-</div></section><section><div class="jp-Cell jp-CodeCell jp-Notebook-cell" id="cell-id=30a100f2">
+</div></section><section><div class="jp-Cell jp-CodeCell jp-Notebook-cell" id="cell-id=f3d548e3">
 <div class="jp-Cell-inputWrapper" tabindex="0">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -7583,7 +7585,7 @@ rank 50/50 average   0.7884
 </div>
 </div>
 </div>
-<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=547a468d">
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=68dada3e">
 <div class="jp-Cell-inputWrapper" tabindex="0">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -7595,7 +7597,7 @@ incompatible outputs (log-times, hazards, 0-100 LLM scores) can be combined safe
 </div>
 </div>
 </div></section></section><section><section>
-<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=92e3116d">
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=ddfc1aeb">
 <div class="jp-Cell-inputWrapper" tabindex="0">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -7608,7 +7610,7 @@ patients never have the event (right censoring).</p>
 </div>
 </div>
 </div></section><section>
-<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=1b78b344">
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=e240943f">
 <div class="jp-Cell-inputWrapper" tabindex="0">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -7681,7 +7683,7 @@ ages, so follow-up runs from the first visit's age to the event or last-visit ag
 </div>
 </div>
 </div>
-</div></section><section><div class="jp-Cell jp-CodeCell jp-Notebook-cell" id="cell-id=c82aad4d">
+</div></section><section><div class="jp-Cell jp-CodeCell jp-Notebook-cell" id="cell-id=14b8c13b">
 <div class="jp-Cell-inputWrapper" tabindex="0">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -7733,7 +7735,7 @@ ages, so follow-up runs from the first visit's age to the event or last-visit ag
 </div>
 </div>
 </div>
-<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=f8559577">
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=9d3bf189">
 <div class="jp-Cell-inputWrapper" tabindex="0">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -7745,7 +7747,7 @@ label proxies and masks visits after the event before building features.</p>
 </div>
 </div>
 </div></section></section><section><section>
-<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=ed7d5158">
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=b225eee8">
 <div class="jp-Cell-inputWrapper" tabindex="0">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -7757,7 +7759,7 @@ such as FIB-4 and APRI, and missingness patterns. Here is a trimmed version on t
 </div>
 </div>
 </div>
-</div></section><section><div class="jp-Cell jp-CodeCell jp-Notebook-cell" id="cell-id=1cffde9d">
+</div></section><section><div class="jp-Cell jp-CodeCell jp-Notebook-cell" id="cell-id=dc2fb3de">
 <div class="jp-Cell-inputWrapper" tabindex="0">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -7841,7 +7843,7 @@ baseline visit only:
 </div>
 </div>
 </div>
-<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=cd18f2a9">
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=0a33a972">
 <div class="jp-Cell-inputWrapper" tabindex="0">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -7850,14 +7852,14 @@ baseline visit only:
 <p>A model that beats the <strong>true risk</strong> is reading the answer. Follow-up stops at the event, so
 last values, slopes and even whether a slope exists all encode how long follow-up lasted. The
 baseline-only model sits just under the truth, as an honest model should.</p>
-<p>The real pipeline drops <code>follow_up_years</code> and <code>Age_delta</code> and masks visits after the event. But it
-keeps <code>Age_first</code> and <code>Age_last</code>, and their difference <em>is</em> the follow-up time. Section 8 shows
-what that did to our CV. <strong>Transfer:</strong> compare every model against an oracle or a baseline-only model.</p>
+<p>The pipeline masked visits after the event and dropped <code>follow_up_years</code> and <code>Age_delta</code>. But it
+kept <code>Age_first</code> and <code>Age_last</code>, and their difference <em>is</em> the follow-up time. Section 8 shows
+what that did to our CV. The loader now drops every window feature. <strong>Transfer:</strong> compare every model against an oracle or a baseline-only model.</p>
 </div>
 </div>
 </div>
 </div></section></section><section><section>
-<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=e58c4811">
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=23bbb5cb">
 <div class="jp-Cell-inputWrapper" tabindex="0">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -7869,7 +7871,7 @@ direction words, reference thresholds and comorbidities.</p>
 </div>
 </div>
 </div>
-</div></section><section><div class="jp-Cell jp-CodeCell jp-Notebook-cell" id="cell-id=919ab873">
+</div></section><section><div class="jp-Cell jp-CodeCell jp-Notebook-cell" id="cell-id=f06f26d7">
 <div class="jp-Cell-inputWrapper" tabindex="0">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -7904,7 +7906,7 @@ BMI: n=5, first=28.6 kg/m2, last=27.47 kg/m2, falling.
 Non-invasive tests (NITs — liver fibrosis staging):
   FibroScan liver stiffness (kPa; F2=7.0, F3=9.5, F4/cirrhosis=12.5): n=2, first=15.18 kPa, last=15.22 kPa, stable
   FibroTest composite score (0–1; F4 &gt;0.74): n=2, first=0.91, last=0.89, stable
-  AIxplorer arterial stiffness: n=1, first=12.27, last=12.27
+  Aixplorer liver stiffness: n=1, first=12.27, last=12.27
   FIB-4 index (low &lt;1.30, high &gt;2.67): 2.6
 </pre><pre style="font-size:0.45em;margin:0">Liver biochemistry:
   ALT (U/L; ULN 40): n=5, first=74.39 U/L, last=82.12 U/L, rising
@@ -7921,7 +7923,7 @@ Metabolic markers:
 </div>
 </div>
 </div></section><section>
-<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=3213b731">
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=73ff506b">
 <div class="jp-Cell-inputWrapper" tabindex="0">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -7932,7 +7934,7 @@ One combined prompt blurs the two, so each endpoint gets its own prompt and its 
 </div>
 </div>
 </div>
-</div></section><section><div class="jp-Cell jp-CodeCell jp-Notebook-cell" id="cell-id=49ba5631">
+</div></section><section><div class="jp-Cell jp-CodeCell jp-Notebook-cell" id="cell-id=55973536">
 <div class="jp-Cell-inputWrapper" tabindex="0">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -7976,7 +7978,7 @@ Return only valid JSON — no other text:
 </div>
 </div>
 </div>
-<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=3b3b675f">
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=0a7e6230">
 <div class="jp-Cell-inputWrapper" tabindex="0">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -7988,7 +7990,7 @@ not probabilities, which is all a C-index needs.</p>
 </div>
 </div>
 </div></section></section><section><section>
-<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=1b3fb4f8">
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=f6089598">
 <div class="jp-Cell-inputWrapper" tabindex="0">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -8000,7 +8002,7 @@ mistakes are.</p>
 </div>
 </div>
 </div>
-</div></section><section><div class="jp-Cell jp-CodeCell jp-Notebook-cell" id="cell-id=6f4da352">
+</div></section><section><div class="jp-Cell jp-CodeCell jp-Notebook-cell" id="cell-id=5f981c09">
 <div class="jp-Cell-inputWrapper" tabindex="0">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -8056,7 +8058,7 @@ mistakes are.</p>
 </div>
 </div>
 </div>
-</div></section><section><div class="jp-Cell jp-CodeCell jp-Notebook-cell" id="cell-id=4a7e91e7">
+</div></section><section><div class="jp-Cell jp-CodeCell jp-Notebook-cell" id="cell-id=3d3c10f1">
 <div class="jp-Cell-inputWrapper" tabindex="0">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -8088,7 +8090,7 @@ mistakes are.</p>
 </div>
 </div>
 </div>
-<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=60de7347">
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=73075400">
 <div class="jp-Cell-inputWrapper" tabindex="0">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -8100,7 +8102,7 @@ standalone score. A standalone gate would have thrown the LLM away.</p>
 </div>
 </div>
 </div></section></section><section><section>
-<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=9c7af6b2">
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=690ceb51">
 <div class="jp-Cell-inputWrapper" tabindex="0">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -8115,7 +8117,7 @@ blend script, say early whether a new ranker is worth it:</p>
 </div>
 </div>
 </div>
-</div></section><section><div class="jp-Cell jp-CodeCell jp-Notebook-cell" id="cell-id=8ba8805e">
+</div></section><section><div class="jp-Cell jp-CodeCell jp-Notebook-cell" id="cell-id=ee98317c">
 <div class="jp-Cell-inputWrapper" tabindex="0">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -8162,7 +8164,7 @@ blend script, say early whether a new ranker is worth it:</p>
 </div>
 </div>
 </div></section></section><section><section>
-<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=c51dbd10">
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=789f66e6">
 <div class="jp-Cell-inputWrapper" tabindex="0">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -8177,7 +8179,7 @@ space with the split-endpoint GPT-OSS scores.</li>
 </div>
 </div>
 </div>
-</div></section><section><div class="jp-Cell jp-CodeCell jp-Notebook-cell" id="cell-id=e9389215">
+</div></section><section><div class="jp-Cell jp-CodeCell jp-Notebook-cell" id="cell-id=778ba9a3">
 <div class="jp-Cell-inputWrapper" tabindex="0">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -8220,7 +8222,7 @@ final    C = 0.7922
 </div>
 </div>
 </div>
-</div></section><section><div class="jp-Cell jp-CodeCell jp-Notebook-cell" id="cell-id=668b0153">
+</div></section><section><div class="jp-Cell jp-CodeCell jp-Notebook-cell" id="cell-id=3e89b07a">
 <div class="jp-Cell-inputWrapper" tabindex="0">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -8278,24 +8280,69 @@ final    C = 0.7922
 <td>0.9502</td>
 </tr>
 <tr>
+<td>10-fold CV, window-free</td>
+<td>xgb (10 seeds), window-free</td>
+<td>0.9123</td>
+</tr>
+<tr>
+<td>10-fold CV, window-free</td>
+<td>cat (10 seeds), window-free</td>
+<td>0.8782</td>
+</tr>
+<tr>
+<td>10-fold CV, window-free</td>
+<td>xgb + cat rank blend, window-free</td>
+<td>0.9020</td>
+</tr>
+<tr>
 <td>CV leak probe</td>
 <td>follow-up span alone (leak probe)</td>
 <td>0.9614</td>
 </tr>
 <tr>
-<td>10-fold CV, window-free</td>
-<td>xgb (10 seeds), window-free</td>
-<td>0.9124</td>
+<td>cv_helm</td>
+<td>window-free base</td>
+<td>0.9020</td>
 </tr>
 <tr>
-<td>10-fold CV, window-free</td>
-<td>cat (10 seeds), window-free</td>
-<td>0.8832</td>
+<td>cv_helm</td>
+<td>GPT-OSS HeLM alone, window-free text</td>
+<td>0.7465</td>
 </tr>
 <tr>
-<td>10-fold CV, window-free</td>
-<td>xgb + cat rank blend, window-free</td>
-<td>0.9055</td>
+<td>cv_helm</td>
+<td>base + GPT-OSS at weight 0.07</td>
+<td>0.8999</td>
+</tr>
+<tr>
+<td>cv_helm_medgemma_split</td>
+<td>window-free base</td>
+<td>0.9020</td>
+</tr>
+<tr>
+<td>cv_helm_medgemma_split</td>
+<td>GPT-OSS HeLM alone, window-free text</td>
+<td>0.5897</td>
+</tr>
+<tr>
+<td>cv_helm_medgemma_split</td>
+<td>base + GPT-OSS at weight 0.07</td>
+<td>0.8981</td>
+</tr>
+<tr>
+<td>cv_helm_medgemma_joint</td>
+<td>window-free base</td>
+<td>0.9020</td>
+</tr>
+<tr>
+<td>cv_helm_medgemma_joint</td>
+<td>GPT-OSS HeLM alone, window-free text</td>
+<td>0.6158</td>
+</tr>
+<tr>
+<td>cv_helm_medgemma_joint</td>
+<td>base + GPT-OSS at weight 0.07</td>
+<td>0.8993</td>
 </tr>
 <tr>
 <td>leaderboard</td>
@@ -8345,7 +8392,7 @@ final    C = 0.7922
 </div>
 </div>
 </div></section></section><section><section>
-<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=053adc50">
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=dca0f622">
 <div class="jp-Cell-inputWrapper" tabindex="0">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -8366,7 +8413,7 @@ risk is not measurement noise. It is overfitting a fixed sample of <strong>127 p
 </div>
 </div>
 </div></section><section>
-<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=267beba3">
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=d79dd960">
 <div class="jp-Cell-inputWrapper" tabindex="0">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -8376,7 +8423,7 @@ risk is not measurement noise. It is overfitting a fixed sample of <strong>127 p
 </div>
 </div>
 </div>
-</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell" id="cell-id=ab1c91ad">
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell" id="cell-id=0eb101f8">
 <div class="jp-Cell-inputWrapper" tabindex="0">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -8415,13 +8462,7 @@ paired SE of a GPT-OSS-style blend gain (weight 0.07), weighted metric:
 <div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
 <div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain" tabindex="0">
 <pre>  public     n = 127: SE 0.0056, credible gain 0.0111
-</pre>
-</div>
-</div>
-<div class="jp-OutputArea-child">
-<div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
-<div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain" tabindex="0">
-<pre>  private    n = 296: SE 0.0029, credible gain 0.0059
+  private    n = 296: SE 0.0029, credible gain 0.0059
 </pre>
 </div>
 </div>
@@ -8435,7 +8476,7 @@ paired SE of a GPT-OSS-style blend gain (weight 0.07), weighted metric:
 </div>
 </div>
 </div>
-<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=3c36b132">
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=c045e069">
 <div class="jp-Cell-inputWrapper" tabindex="0">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -8447,7 +8488,7 @@ public sample, a credible gain still needs <strong>about 0.01</strong>.</p>
 </div>
 </div>
 </div></section><section>
-<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=caa75a88">
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=fc30c8a0">
 <div class="jp-Cell-inputWrapper" tabindex="0">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -8457,7 +8498,7 @@ public sample, a credible gain still needs <strong>about 0.01</strong>.</p>
 </div>
 </div>
 </div>
-</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell" id="cell-id=39aea0a9">
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell" id="cell-id=45ff7574">
 <div class="jp-Cell-inputWrapper" tabindex="0">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -8513,7 +8554,7 @@ public winner is also the private winner in 5% of splits; its public score is in
 </div>
 </div>
 </div>
-<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=d7ab7594">
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=e1f6f938">
 <div class="jp-Cell-inputWrapper" tabindex="0">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -8526,7 +8567,7 @@ winner being the wrong pick is the expected outcome, not bad luck.</p>
 </div>
 </div>
 </div></section><section>
-<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=4bfa1fc0">
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=379a2898">
 <div class="jp-Cell-inputWrapper" tabindex="0">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -8541,7 +8582,7 @@ metric is treated as one endpoint.</em></p>
 </div>
 </div>
 </div>
-</div></section><section><div class="jp-Cell jp-CodeCell jp-Notebook-cell" id="cell-id=90a94390">
+</div></section><section><div class="jp-Cell jp-CodeCell jp-Notebook-cell" id="cell-id=573c3985">
 <div class="jp-Cell-inputWrapper" tabindex="0">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -8591,7 +8632,7 @@ metric is treated as one endpoint.</em></p>
 </div>
 </div>
 </div>
-<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=15bb54ed">
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=fa3ac111">
 <div class="jp-Cell-inputWrapper" tabindex="0">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -8602,7 +8643,7 @@ ties that the Gaussian model does not describe. So the predicted gain is an <str
 </div>
 </div>
 </div>
-</div></section><section><div class="jp-Cell jp-CodeCell jp-Notebook-cell" id="cell-id=37a94a8c">
+</div></section><section><div class="jp-Cell jp-CodeCell jp-Notebook-cell" id="cell-id=3621bf87">
 <div class="jp-Cell-inputWrapper" tabindex="0">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -8659,7 +8700,7 @@ ties that the Gaussian model does not describe. So the predicted gain is an <str
 </div>
 </div>
 </div>
-<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=f4b70e35">
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=0af7ca3a">
 <div class="jp-Cell-inputWrapper" tabindex="0">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -8672,7 +8713,7 @@ from the 127-patient sample.</p>
 </div>
 </div>
 </div></section><section>
-<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=b0b60da9">
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=2e5c9b2c">
 <div class="jp-Cell-inputWrapper" tabindex="0">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -8686,7 +8727,7 @@ endpoint, or a held-out split. A sign test across folds is cheap.</p>
 </div>
 </div>
 </div>
-</div></section><section><div class="jp-Cell jp-CodeCell jp-Notebook-cell" id="cell-id=0fd9494b">
+</div></section><section><div class="jp-Cell jp-CodeCell jp-Notebook-cell" id="cell-id=77f762b6">
 <div class="jp-Cell-inputWrapper" tabindex="0">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -8733,7 +8774,7 @@ endpoint, or a held-out split. A sign test across folds is cheap.</p>
 <div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain" tabindex="0">
 <pre>tabular base: 10-fold CV 0.9502 | public leaderboard 0.8938 | gap +0.0564
 red flag 0.947: CV is ABOVE it
-same base, window-free features: CV 0.9055 | gap to leaderboard +0.0117
+same base, window-free features: CV 0.9020 | gap to leaderboard +0.0082
 leak probe, follow-up span alone: CV 0.9614 (hepatic 0.958, death 0.969)
 one public score's SE ~ 0.070, so a CV-to-leaderboard gap under 0.140 proves nothing by itself
 about 5 hepatic events per CV fold: one fold's SE ~ 0.062
@@ -8743,7 +8784,7 @@ about 5 hepatic events per CV fold: one fold's SE ~ 0.062
 </div>
 </div>
 </div>
-<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=18935424">
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=01f82a19">
 <div class="jp-Cell-inputWrapper" tabindex="0">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -8753,13 +8794,88 @@ about 5 hepatic events per CV fold: one fold's SE ~ 0.062
 model is mostly reading how long patients were followed. The CV also sits above the repo's own red
 flag. The leaderboard gap alone could not show this: one public score is too noisy. The leak
 probe and the ceiling did. With about five events per fold, a perfect fold of 1.000 is noise too.</p>
-<p><strong>The fix:</strong> drop every feature computed over the observation window, 24 in all. The same base
-then scores <strong>0.906</strong> in CV, below the red flag and close to the leaderboard's 0.894.</p>
+<p><strong>The fix:</strong> drop every feature computed over the observation window, 26 in all. The same base
+then scores <strong>0.902</strong> in CV, below the red flag and close to the leaderboard's 0.894.</p>
 </div>
 </div>
 </div>
 </div></section><section>
-<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=0e88783a">
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=e197d0b7">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
+</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
+<h3 id="Another-decision-the-leaky-gate-approved:-the-50/50-blend">Another decision the leaky gate approved: the 50/50 blend<a class="anchor-link" href="#Another-decision-the-leaky-gate-approved:-the-50/50-blend">¶</a></h3><p>The pipeline blends XGBoost and CatBoost 50/50 because the CV as run favoured it. Without the
+leak, XGBoost alone looks better. Is that a finding, or a second false positive?</p>
+</div>
+</div>
+</div>
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell" id="cell-id=e6f62eea">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea">
+<div class="jp-InputPrompt jp-InputArea-prompt">In [19]:</div>
+<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
+<div class="cm-editor cm-s-jupyter">
+<div class="highlight hl-ipython3"><pre><span></span><span class="n">by</span> <span class="o">=</span> <span class="p">{(</span><span class="n">r</span><span class="p">[</span><span class="s2">"stage"</span><span class="p">],</span> <span class="n">r</span><span class="p">[</span><span class="s2">"model"</span><span class="p">]):</span> <span class="nb">float</span><span class="p">(</span><span class="n">r</span><span class="p">[</span><span class="s2">"weighted"</span><span class="p">])</span> <span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="n">cv</span><span class="p">}</span>
+<span class="k">for</span> <span class="n">stage</span><span class="p">,</span> <span class="n">sfx</span><span class="p">,</span> <span class="n">label</span> <span class="ow">in</span> <span class="p">((</span><span class="s2">"cv"</span><span class="p">,</span> <span class="s2">""</span><span class="p">,</span> <span class="s2">"CV as run"</span><span class="p">),</span> <span class="p">(</span><span class="s2">"cv_clean"</span><span class="p">,</span> <span class="s2">", window-free"</span><span class="p">,</span> <span class="s2">"window-free CV"</span><span class="p">)):</span>
+    <span class="n">vals</span> <span class="o">=</span> <span class="p">[</span><span class="n">by</span><span class="o">.</span><span class="n">get</span><span class="p">((</span><span class="n">stage</span><span class="p">,</span> <span class="n">m</span> <span class="o">+</span> <span class="n">sfx</span><span class="p">))</span> <span class="k">for</span> <span class="n">m</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">"xgb (10 seeds)"</span><span class="p">,</span> <span class="s2">"cat (10 seeds)"</span><span class="p">,</span> <span class="s2">"xgb + cat rank blend"</span><span class="p">)]</span>
+    <span class="k">if</span> <span class="nb">all</span><span class="p">(</span><span class="n">v</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">vals</span><span class="p">):</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">label</span><span class="si">:</span><span class="s2">15s</span><span class="si">}</span><span class="s2"> XGB </span><span class="si">{</span><span class="n">vals</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="si">:</span><span class="s2">.4f</span><span class="si">}</span><span class="s2"> | Cat </span><span class="si">{</span><span class="n">vals</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="si">:</span><span class="s2">.4f</span><span class="si">}</span><span class="s2"> | blend </span><span class="si">{</span><span class="n">vals</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="si">:</span><span class="s2">.4f</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+<span class="n">wf</span> <span class="o">=</span> <span class="p">[</span><span class="n">r</span> <span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="n">csv_rows</span><span class="p">(</span><span class="s2">"cv_folds.csv"</span><span class="p">)</span> <span class="k">if</span> <span class="n">r</span><span class="p">[</span><span class="s2">"comparison"</span><span class="p">]</span> <span class="o">==</span> <span class="s2">"xgb_only_vs_blend"</span><span class="p">]</span>
+<span class="k">if</span> <span class="n">wf</span><span class="p">:</span>
+    <span class="n">d</span> <span class="o">=</span> <span class="p">{</span><span class="n">ep</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="nb">float</span><span class="p">(</span><span class="n">r</span><span class="p">[</span><span class="s2">"delta"</span><span class="p">])</span> <span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="n">wf</span> <span class="k">if</span> <span class="n">r</span><span class="p">[</span><span class="s2">"endpoint"</span><span class="p">]</span> <span class="o">==</span> <span class="n">ep</span><span class="p">])</span> <span class="k">for</span> <span class="n">ep</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">"hep"</span><span class="p">,</span> <span class="s2">"death"</span><span class="p">)}</span>
+    <span class="k">for</span> <span class="n">ep</span><span class="p">,</span> <span class="n">name</span> <span class="ow">in</span> <span class="p">((</span><span class="s2">"hep"</span><span class="p">,</span> <span class="s2">"hepatic"</span><span class="p">),</span> <span class="p">(</span><span class="s2">"death"</span><span class="p">,</span> <span class="s2">"death"</span><span class="p">)):</span>
+        <span class="n">k</span> <span class="o">=</span> <span class="nb">int</span><span class="p">((</span><span class="n">d</span><span class="p">[</span><span class="n">ep</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">())</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"XGB beats blend in </span><span class="si">{</span><span class="n">k</span><span class="si">}</span><span class="s2">/10 </span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2"> folds (p = </span><span class="si">{</span><span class="n">binomtest</span><span class="p">(</span><span class="n">k</span><span class="p">,</span><span class="w"> </span><span class="mi">10</span><span class="p">,</span><span class="w"> </span><span class="mf">0.5</span><span class="p">,</span><span class="w"> </span><span class="n">alternative</span><span class="o">=</span><span class="s1">'greater'</span><span class="p">)</span><span class="o">.</span><span class="n">pvalue</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2">)"</span><span class="p">)</span>
+    <span class="n">wd</span> <span class="o">=</span> <span class="mf">0.7</span> <span class="o">*</span> <span class="n">d</span><span class="p">[</span><span class="s2">"hep"</span><span class="p">]</span> <span class="o">+</span> <span class="mf">0.3</span> <span class="o">*</span> <span class="n">d</span><span class="p">[</span><span class="s2">"death"</span><span class="p">]</span>
+    <span class="n">views</span> <span class="o">=</span> <span class="p">[(</span><span class="s2">"fold mean"</span><span class="p">,</span> <span class="n">wd</span><span class="o">.</span><span class="n">mean</span><span class="p">(),</span> <span class="n">wd</span><span class="o">.</span><span class="n">std</span><span class="p">(</span><span class="n">ddof</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">wd</span><span class="p">)))]</span>
+    <span class="n">boot</span> <span class="o">=</span> <span class="p">{</span><span class="n">r</span><span class="p">[</span><span class="s2">"comparison"</span><span class="p">]:</span> <span class="n">r</span> <span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="n">csv_rows</span><span class="p">(</span><span class="s2">"cv_tests.csv"</span><span class="p">)}</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"xgb_only_vs_blend"</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">boot</span><span class="p">:</span>
+        <span class="n">views</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="s2">"patient bootstrap"</span><span class="p">,</span> <span class="nb">float</span><span class="p">(</span><span class="n">boot</span><span class="p">[</span><span class="s2">"estimate"</span><span class="p">]),</span> <span class="nb">float</span><span class="p">(</span><span class="n">boot</span><span class="p">[</span><span class="s2">"se"</span><span class="p">])))</span>
+    <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">est</span><span class="p">,</span> <span class="n">se</span> <span class="ow">in</span> <span class="n">views</span><span class="p">:</span>              <span class="c1"># K = 3: picked among XGB, Cat and blend after seeing CV</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">name</span><span class="si">:</span><span class="s2">17s</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="n">est</span><span class="si">:</span><span class="s2">+.4f</span><span class="si">}</span><span class="s2"> ± </span><span class="si">{</span><span class="n">se</span><span class="si">:</span><span class="s2">.4f</span><span class="si">}</span><span class="s2"> (</span><span class="si">{</span><span class="n">est</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="n">se</span><span class="si">:</span><span class="s2">.1f</span><span class="si">}</span><span class="s2"> SE) -&gt; </span><span class="si">{</span><span class="n">G</span><span class="o">.</span><span class="n">verdict</span><span class="p">(</span><span class="n">est</span><span class="p">,</span><span class="w"> </span><span class="n">se</span><span class="p">,</span><span class="w"> </span><span class="mi">3</span><span class="p">,</span><span class="w"> </span><span class="n">np</span><span class="o">.</span><span class="n">inf</span><span class="p">,</span><span class="w"> </span><span class="kc">False</span><span class="p">)</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+<div class="jp-Cell-outputWrapper">
+<div class="jp-Collapser jp-OutputCollapser jp-Cell-outputCollapser">
+</div>
+<div class="jp-OutputArea jp-Cell-outputArea">
+<div class="jp-OutputArea-child">
+<div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
+<div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain" tabindex="0">
+<pre>CV as run       XGB 0.9434 | Cat 0.9494 | blend 0.9502
+window-free CV  XGB 0.9123 | Cat 0.8782 | blend 0.9020
+XGB beats blend in 6/10 hepatic folds (p = 0.38)
+XGB beats blend in 5/10 death folds (p = 0.62)
+fold mean         +0.0155 ± 0.0056 (2.8 SE) -&gt; unreplicated
+patient bootstrap +0.0103 ± 0.0070 (1.5 SE) -&gt; within noise
+</pre>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=cdfcd547">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
+</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
+<p><strong>Suggestive, not yet credible.</strong> The leaky CV approved 50/50 on a margin of 0.0008. Without
+the leak, XGBoost looks better, but the evidence is mixed: the fold mean clears the bars, the
+patient bootstrap does not, and XGBoost wins only about half the folds. We also picked this
+comparison after seeing the scores. Confirm it on data the choice never saw before switching.</p>
+</div>
+</div>
+</div>
+</div></section><section>
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=455b009c">
 <div class="jp-Cell-inputWrapper" tabindex="0">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -8769,16 +8885,15 @@ then scores <strong>0.906</strong> in CV, below the red flag and close to the le
 </div>
 </div>
 </div>
-</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell" id="cell-id=b6ccd75b">
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell" id="cell-id=01a79726">
 <div class="jp-Cell-inputWrapper" tabindex="0">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In [19]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In [20]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
 <div class="cm-editor cm-s-jupyter">
-<div class="highlight hl-ipython3"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">scipy.stats</span><span class="w"> </span><span class="kn">import</span> <span class="n">binomtest</span>
-<span class="n">tab</span><span class="p">,</span> <span class="n">llm</span> <span class="o">=</span> <span class="n">S</span><span class="o">.</span><span class="n">rankers</span><span class="p">(</span><span class="n">cal_syn</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">seed</span><span class="o">=</span><span class="mi">21</span><span class="p">,</span> <span class="n">shared</span><span class="o">=</span><span class="mf">0.1</span><span class="p">)</span>
+<div class="highlight hl-ipython3"><pre><span></span><span class="n">tab</span><span class="p">,</span> <span class="n">llm</span> <span class="o">=</span> <span class="n">S</span><span class="o">.</span><span class="n">rankers</span><span class="p">(</span><span class="n">cal_syn</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">seed</span><span class="o">=</span><span class="mi">21</span><span class="p">,</span> <span class="n">shared</span><span class="o">=</span><span class="mf">0.1</span><span class="p">)</span>
 <span class="n">folds</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array_split</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">default_rng</span><span class="p">(</span><span class="mi">21</span><span class="p">)</span><span class="o">.</span><span class="n">permutation</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">tab</span><span class="p">)),</span> <span class="mi">10</span><span class="p">)</span>
 <span class="n">blend</span> <span class="o">=</span> <span class="mf">0.93</span> <span class="o">*</span> <span class="n">_rank01</span><span class="p">(</span><span class="n">tab</span><span class="p">)</span> <span class="o">+</span> <span class="mf">0.07</span> <span class="o">*</span> <span class="n">_rank01</span><span class="p">(</span><span class="n">llm</span><span class="p">)</span>
 <span class="n">d</span> <span class="o">=</span> <span class="p">[</span><span class="n">cidx</span><span class="p">(</span><span class="n">ev_s</span><span class="p">[</span><span class="n">f</span><span class="p">],</span> <span class="n">t_s</span><span class="p">[</span><span class="n">f</span><span class="p">],</span> <span class="n">blend</span><span class="p">[</span><span class="n">f</span><span class="p">])</span> <span class="o">-</span> <span class="n">cidx</span><span class="p">(</span><span class="n">ev_s</span><span class="p">[</span><span class="n">f</span><span class="p">],</span> <span class="n">t_s</span><span class="p">[</span><span class="n">f</span><span class="p">],</span> <span class="n">tab</span><span class="p">[</span><span class="n">f</span><span class="p">])</span> <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">folds</span><span class="p">]</span>
@@ -8802,19 +8917,153 @@ then scores <strong>0.906</strong> in CV, below the red flag and close to the le
 </div>
 </div>
 </div>
-</div>
-<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=21bd480e">
+</div></section><section>
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=54e02494">
 <div class="jp-Cell-inputWrapper" tabindex="0">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
-<p>Our HeLM scores were never run on the training set, so <strong>no LLM gain here has a CV replicate</strong>.</p>
+<h3 id="The-real-replication:-GPT-OSS-inside-the-window-free-CV">The real replication: GPT-OSS inside the window-free CV<a class="anchor-link" href="#The-real-replication:-GPT-OSS-inside-the-window-free-CV">¶</a></h3><p>GPT-OSS scored all 1,253 training patients zero-shot. Its text drops follow-up length and
+post-event visits, like the base. The blend weight, <strong>0.07</strong>, is the submitted one, fixed in advance.</p>
+</div>
+</div>
+</div>
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell" id="cell-id=e50e1773">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea">
+<div class="jp-InputPrompt jp-InputArea-prompt">In [21]:</div>
+<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
+<div class="cm-editor cm-s-jupyter">
+<div class="highlight hl-ipython3"><pre><span></span><span class="n">helm</span> <span class="o">=</span> <span class="p">{</span><span class="n">r</span><span class="p">[</span><span class="s2">"model"</span><span class="p">]:</span> <span class="n">r</span> <span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="n">cv</span> <span class="k">if</span> <span class="n">r</span><span class="p">[</span><span class="s2">"stage"</span><span class="p">]</span> <span class="o">==</span> <span class="s2">"cv_helm"</span><span class="p">}</span>
+<span class="n">fold_rows</span> <span class="o">=</span> <span class="p">[</span><span class="n">r</span> <span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="n">csv_rows</span><span class="p">(</span><span class="s2">"cv_folds.csv"</span><span class="p">)</span> <span class="k">if</span> <span class="n">r</span><span class="p">[</span><span class="s2">"comparison"</span><span class="p">]</span> <span class="o">==</span> <span class="s2">"helm_blend_vs_base"</span><span class="p">]</span>
+<span class="k">if</span> <span class="n">helm</span><span class="p">:</span>
+    <span class="n">short</span> <span class="o">=</span> <span class="p">{</span><span class="s2">"window-free base"</span><span class="p">:</span> <span class="s2">"base"</span><span class="p">,</span> <span class="s2">"GPT-OSS HeLM alone, window-free text"</span><span class="p">:</span> <span class="s2">"GPT-OSS alone"</span><span class="p">,</span>
+             <span class="s2">"base + GPT-OSS at weight 0.07"</span><span class="p">:</span> <span class="s2">"base + GPT-OSS"</span><span class="p">}</span>
+    <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">r</span> <span class="ow">in</span> <span class="n">helm</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">short</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">name</span><span class="p">,</span><span class="w"> </span><span class="n">name</span><span class="p">)</span><span class="si">:</span><span class="s2">15s</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="nb">float</span><span class="p">(</span><span class="n">r</span><span class="p">[</span><span class="s1">'weighted'</span><span class="p">])</span><span class="si">:</span><span class="s2">.4f</span><span class="si">}</span><span class="s2">"</span>
+              <span class="sa">f</span><span class="s2">" (hep </span><span class="si">{</span><span class="nb">float</span><span class="p">(</span><span class="n">r</span><span class="p">[</span><span class="s1">'c_hep'</span><span class="p">])</span><span class="si">:</span><span class="s2">.3f</span><span class="si">}</span><span class="s2">, death </span><span class="si">{</span><span class="nb">float</span><span class="p">(</span><span class="n">r</span><span class="p">[</span><span class="s1">'c_death'</span><span class="p">])</span><span class="si">:</span><span class="s2">.3f</span><span class="si">}</span><span class="s2">)"</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">ep</span><span class="p">,</span> <span class="n">name</span> <span class="ow">in</span> <span class="p">((</span><span class="s2">"hep"</span><span class="p">,</span> <span class="s2">"hepatic"</span><span class="p">),</span> <span class="p">(</span><span class="s2">"death"</span><span class="p">,</span> <span class="s2">"death"</span><span class="p">)):</span>
+        <span class="n">d</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="nb">float</span><span class="p">(</span><span class="n">r</span><span class="p">[</span><span class="s2">"delta"</span><span class="p">])</span> <span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="n">fold_rows</span> <span class="k">if</span> <span class="n">r</span><span class="p">[</span><span class="s2">"endpoint"</span><span class="p">]</span> <span class="o">==</span> <span class="n">ep</span><span class="p">])</span>
+        <span class="n">k</span> <span class="o">=</span> <span class="nb">int</span><span class="p">((</span><span class="n">d</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">())</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">name</span><span class="si">:</span><span class="s2">8s</span><span class="si">}</span><span class="s2"> blend wins </span><span class="si">{</span><span class="n">k</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">d</span><span class="p">)</span><span class="si">}</span><span class="s2"> folds, mean </span><span class="si">{</span><span class="n">d</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span><span class="si">:</span><span class="s2">+.4f</span><span class="si">}</span><span class="s2">"</span>
+              <span class="sa">f</span><span class="s2">" ± </span><span class="si">{</span><span class="n">d</span><span class="o">.</span><span class="n">std</span><span class="p">(</span><span class="n">ddof</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">d</span><span class="p">))</span><span class="si">:</span><span class="s2">.4f</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+    <span class="n">b</span><span class="p">,</span> <span class="n">l</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">helm</span><span class="p">[</span><span class="s2">"window-free base"</span><span class="p">][</span><span class="s2">"weighted"</span><span class="p">]),</span> <span class="nb">float</span><span class="p">(</span><span class="n">helm</span><span class="p">[</span><span class="s2">"GPT-OSS HeLM alone, window-free text"</span><span class="p">][</span><span class="s2">"weighted"</span><span class="p">])</span>
+    <span class="n">s_b</span><span class="p">,</span> <span class="n">s_l</span> <span class="o">=</span> <span class="n">sig</span><span class="p">(</span><span class="n">b</span><span class="p">),</span> <span class="n">sig</span><span class="p">(</span><span class="n">l</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">"predicted gain: "</span> <span class="o">+</span> <span class="s2">" | "</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
+        <span class="sa">f</span><span class="s2">"r=</span><span class="si">{</span><span class="n">r</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="n">G</span><span class="o">.</span><span class="n">predicted_gain</span><span class="p">(</span><span class="n">CAL</span><span class="p">[</span><span class="s1">'hep'</span><span class="p">],</span><span class="w"> </span><span class="n">s_b</span><span class="p">,</span><span class="w"> </span><span class="n">s_l</span><span class="p">,</span><span class="w"> </span><span class="n">r</span><span class="p">,</span><span class="w"> </span><span class="mf">0.07</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span><span class="si">:</span><span class="s2">+.4f</span><span class="si">}</span><span class="s2">"</span> <span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="p">(</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.3</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">)))</span>
+<span class="k">else</span><span class="p">:</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">"run talk/helm_train_scores.py, then talk/helm_cv.py, to fill this slide"</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+<div class="jp-Cell-outputWrapper">
+<div class="jp-Collapser jp-OutputCollapser jp-Cell-outputCollapser">
+</div>
+<div class="jp-OutputArea jp-Cell-outputArea">
+<div class="jp-OutputArea-child">
+<div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
+<div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain" tabindex="0">
+<pre>base            0.9020 (hep 0.904, death 0.898)
+GPT-OSS alone   0.7465 (hep 0.752, death 0.733)
+base + GPT-OSS  0.8999 (hep 0.903, death 0.894)
+hepatic  blend wins 1/10 folds, mean -0.0045 ± 0.0043
+death    blend wins 2/10 folds, mean -0.0015 ± 0.0021
+</pre>
+</div>
+</div>
+<div class="jp-OutputArea-child">
+<div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
+<div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain" tabindex="0">
+<pre>predicted gain: r=0.0 +0.0024 | r=0.3 -0.0002 | r=0.5 -0.0021
+</pre>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=374acdc0">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
+</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
+<p><strong>It does not replicate.</strong> On 1,253 patients, the blend loses to the base in most folds. The
+mechanism predicts exactly this if the LLM's errors correlate with the base's at about 0.5. At
+this gap in standalone skill, a weak ranker helps only when its errors are nearly independent.
+<em>Differences from the submission: window-free text, the corrected post-event masking, and the
+tabular base in place of the EfficientNet base.</em></p>
 </div>
 </div>
 </div>
 </div></section><section>
-<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=7901ef3e">
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=23069dc5">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
+</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
+<h3 id="One-prompt-or-two?-Joint-prediction-of-both-endpoints">One prompt or two? Joint prediction of both endpoints<a class="anchor-link" href="#One-prompt-or-two?-Joint-prediction-of-both-endpoints">¶</a></h3><p>The split prompts ask about each endpoint alone. A joint prompt asks for both risks at once, so
+the model can reason about competing risks. Same text, same weight 0.07, same folds. GPT-OSS and
+MedGemma 1.5 run with thinking off; Nemotron 3 Super runs with reasoning on.</p>
+</div>
+</div>
+</div>
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell" id="cell-id=b70524f6">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea">
+<div class="jp-InputPrompt jp-InputArea-prompt">In [22]:</div>
+<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
+<div class="cm-editor cm-s-jupyter">
+<div class="highlight hl-ipython3"><pre><span></span><span class="n">tests</span> <span class="o">=</span> <span class="p">{</span><span class="n">r</span><span class="p">[</span><span class="s2">"comparison"</span><span class="p">]:</span> <span class="n">r</span> <span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="n">csv_rows</span><span class="p">(</span><span class="s2">"cv_tests.csv"</span><span class="p">)}</span>
+<span class="n">runs</span> <span class="o">=</span> <span class="p">[(</span><span class="s2">"GPT-OSS split"</span><span class="p">,</span> <span class="s2">"cv_helm"</span><span class="p">,</span> <span class="s2">"helm_blend_vs_base"</span><span class="p">),</span> <span class="p">(</span><span class="s2">"GPT-OSS joint"</span><span class="p">,</span> <span class="s2">"cv_helm_joint"</span><span class="p">,</span> <span class="s2">"helm_joint_blend_vs_base"</span><span class="p">)]</span>
+<span class="n">runs</span> <span class="o">+=</span> <span class="p">[(</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">label</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="n">mode</span><span class="si">}</span><span class="s2">"</span><span class="p">,</span> <span class="sa">f</span><span class="s2">"cv_helm_</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">_</span><span class="si">{</span><span class="n">mode</span><span class="si">}</span><span class="s2">"</span><span class="p">,</span> <span class="sa">f</span><span class="s2">"helm_</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">_</span><span class="si">{</span><span class="n">mode</span><span class="si">}</span><span class="s2">_blend_vs_base"</span><span class="p">)</span>
+         <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">label</span> <span class="ow">in</span> <span class="p">((</span><span class="s2">"nemotron"</span><span class="p">,</span> <span class="s2">"Nemotron"</span><span class="p">),</span> <span class="p">(</span><span class="s2">"medgemma"</span><span class="p">,</span> <span class="s2">"MedGemma"</span><span class="p">))</span> <span class="k">for</span> <span class="n">mode</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">"split"</span><span class="p">,</span> <span class="s2">"joint"</span><span class="p">)]</span>
+<span class="n">shown</span> <span class="o">=</span> <span class="mi">0</span>
+<span class="k">for</span> <span class="n">label</span><span class="p">,</span> <span class="n">stage</span><span class="p">,</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">runs</span><span class="p">:</span>
+    <span class="n">r</span> <span class="o">=</span> <span class="p">{</span><span class="n">x</span><span class="p">[</span><span class="s2">"model"</span><span class="p">]:</span> <span class="nb">float</span><span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="s2">"weighted"</span><span class="p">])</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">cv</span> <span class="k">if</span> <span class="n">x</span><span class="p">[</span><span class="s2">"stage"</span><span class="p">]</span> <span class="o">==</span> <span class="n">stage</span><span class="p">}</span>
+    <span class="k">if</span> <span class="n">r</span> <span class="ow">and</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">tests</span><span class="p">:</span>
+        <span class="n">est</span><span class="p">,</span> <span class="n">se</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">tests</span><span class="p">[</span><span class="n">key</span><span class="p">][</span><span class="s2">"estimate"</span><span class="p">]),</span> <span class="nb">float</span><span class="p">(</span><span class="n">tests</span><span class="p">[</span><span class="n">key</span><span class="p">][</span><span class="s2">"se"</span><span class="p">])</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">label</span><span class="si">:</span><span class="s2">13s</span><span class="si">}</span><span class="s2"> alone </span><span class="si">{</span><span class="n">r</span><span class="p">[</span><span class="s1">'GPT-OSS HeLM alone, window-free text'</span><span class="p">]</span><span class="si">:</span><span class="s2">.4f</span><span class="si">}</span><span class="s2">"</span>
+              <span class="sa">f</span><span class="s2">" | blend - base </span><span class="si">{</span><span class="n">est</span><span class="si">:</span><span class="s2">+.4f</span><span class="si">}</span><span class="s2"> ± </span><span class="si">{</span><span class="n">se</span><span class="si">:</span><span class="s2">.4f</span><span class="si">}</span><span class="s2"> (</span><span class="si">{</span><span class="n">est</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="n">se</span><span class="si">:</span><span class="s2">+.1f</span><span class="si">}</span><span class="s2"> SE)"</span><span class="p">)</span>
+        <span class="n">shown</span> <span class="o">+=</span> <span class="mi">1</span>
+<span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">label</span> <span class="ow">in</span> <span class="p">((</span><span class="s2">"helm_joint_vs_split_blend"</span><span class="p">,</span> <span class="s2">"GPT-OSS joint - split"</span><span class="p">),</span>
+                   <span class="p">(</span><span class="s2">"helm_nemotron_joint_vs_split_blend"</span><span class="p">,</span> <span class="s2">"Nemotron joint - split"</span><span class="p">),</span>
+                   <span class="p">(</span><span class="s2">"helm_medgemma_joint_vs_split_blend"</span><span class="p">,</span> <span class="s2">"MedGemma joint - split"</span><span class="p">)):</span>
+    <span class="k">if</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">tests</span><span class="p">:</span>
+        <span class="n">est</span><span class="p">,</span> <span class="n">se</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">tests</span><span class="p">[</span><span class="n">key</span><span class="p">][</span><span class="s2">"estimate"</span><span class="p">]),</span> <span class="nb">float</span><span class="p">(</span><span class="n">tests</span><span class="p">[</span><span class="n">key</span><span class="p">][</span><span class="s2">"se"</span><span class="p">])</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">label</span><span class="si">:</span><span class="s2">22s</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="n">est</span><span class="si">:</span><span class="s2">+.4f</span><span class="si">}</span><span class="s2"> ± </span><span class="si">{</span><span class="n">se</span><span class="si">:</span><span class="s2">.4f</span><span class="si">}</span><span class="s2"> (</span><span class="si">{</span><span class="n">est</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="n">se</span><span class="si">:</span><span class="s2">+.1f</span><span class="si">}</span><span class="s2"> SE)"</span><span class="p">)</span>
+<span class="k">if</span> <span class="n">shown</span> <span class="o">&lt;=</span> <span class="mi">1</span><span class="p">:</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">"run talk/helm_train_scores.py for the joint, Nemotron and MedGemma variants, then talk/helm_cv.py"</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+<div class="jp-Cell-outputWrapper">
+<div class="jp-Collapser jp-OutputCollapser jp-Cell-outputCollapser">
+</div>
+<div class="jp-OutputArea jp-Cell-outputArea">
+<div class="jp-OutputArea-child">
+<div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
+<div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain" tabindex="0">
+<pre>GPT-OSS split alone 0.7465 | blend - base -0.0018 ± 0.0020 (-0.9 SE)
+MedGemma split alone 0.5897 | blend - base -0.0038 ± 0.0022 (-1.7 SE)
+MedGemma joint alone 0.6158 | blend - base -0.0025 ± 0.0025 (-1.0 SE)
+MedGemma joint - split +0.0013 ± 0.0018 (+0.7 SE)
+</pre>
+</div>
+</div>
+</div>
+</div>
+</div></section><section>
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=0eeb798a">
 <div class="jp-Cell-inputWrapper" tabindex="0">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -8824,12 +9073,12 @@ then scores <strong>0.906</strong> in CV, below the red flag and close to the le
 </div>
 </div>
 </div>
-</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell" id="cell-id=4d23e145">
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell" id="cell-id=c08175b3">
 <div class="jp-Cell-inputWrapper" tabindex="0">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In [20]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In [23]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
 <div class="cm-editor cm-s-jupyter">
 <div class="highlight hl-ipython3"><pre><span></span><span class="c1"># (decision, gain seen, K tries for that decision in the upload history, base C, added-model C, weight)</span>
@@ -8847,6 +9096,9 @@ then scores <strong>0.906</strong> in CV, below the red flag and close to the le
     <span class="k">else</span><span class="p">:</span>
         <span class="n">se</span><span class="p">,</span> <span class="n">mech</span> <span class="o">=</span> <span class="n">se_ref</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">inf</span>                  <span class="c1"># no mechanism model: generic paired SE</span>
     <span class="n">v</span> <span class="o">=</span> <span class="n">G</span><span class="o">.</span><span class="n">verdict</span><span class="p">(</span><span class="n">gain</span><span class="p">,</span> <span class="n">se</span><span class="p">,</span> <span class="n">k</span><span class="p">,</span> <span class="n">mech</span><span class="p">,</span> <span class="n">replicated</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+    <span class="n">rep</span> <span class="o">=</span> <span class="p">{</span><span class="n">r</span><span class="p">[</span><span class="s2">"comparison"</span><span class="p">]:</span> <span class="n">r</span> <span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="n">csv_rows</span><span class="p">(</span><span class="s2">"cv_tests.csv"</span><span class="p">)}</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"helm_blend_vs_base"</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">name</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">"GPT-OSS"</span><span class="p">)</span> <span class="ow">and</span> <span class="n">rep</span> <span class="ow">and</span> <span class="nb">float</span><span class="p">(</span><span class="n">rep</span><span class="p">[</span><span class="s2">"estimate"</span><span class="p">])</span> <span class="o">&lt;=</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">v</span> <span class="o">=</span> <span class="s2">"failed replication in CV"</span>
     <span class="n">mech_txt</span> <span class="o">=</span> <span class="s2">"n/a"</span> <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">isinf</span><span class="p">(</span><span class="n">mech</span><span class="p">)</span> <span class="k">else</span> <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">mech</span><span class="si">:</span><span class="s2">+.4f</span><span class="si">}</span><span class="s2">"</span>
     <span class="n">md</span> <span class="o">+=</span> <span class="p">(</span><span class="sa">f</span><span class="s2">"| </span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2"> | </span><span class="si">{</span><span class="n">gain</span><span class="si">:</span><span class="s2">+.4f</span><span class="si">}</span><span class="s2"> | </span><span class="si">{</span><span class="n">se</span><span class="si">:</span><span class="s2">.4f</span><span class="si">}</span><span class="s2"> | </span><span class="si">{</span><span class="n">gain</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="n">se</span><span class="si">:</span><span class="s2">.1f</span><span class="si">}</span><span class="s2"> | </span><span class="si">{</span><span class="n">k</span><span class="si">}</span><span class="s2"> | </span><span class="si">{</span><span class="n">G</span><span class="o">.</span><span class="n">null_max_gain</span><span class="p">(</span><span class="n">se</span><span class="p">,</span><span class="w"> </span><span class="n">k</span><span class="p">)</span><span class="si">:</span><span class="s2">.4f</span><span class="si">}</span><span class="s2">"</span>
            <span class="sa">f</span><span class="s2">" | </span><span class="si">{</span><span class="n">mech_txt</span><span class="si">}</span><span class="s2"> | **</span><span class="si">{</span><span class="n">v</span><span class="si">}</span><span class="s2">** |</span><span class="se">\n</span><span class="s2">"</span><span class="p">)</span>
@@ -8905,7 +9157,7 @@ then scores <strong>0.906</strong> in CV, below the red flag and close to the le
 <td>5</td>
 <td>0.0100</td>
 <td>+0.0077</td>
-<td><strong>within noise</strong></td>
+<td><strong>failed replication in CV</strong></td>
 </tr>
 <tr>
 <td>Final two-stage over GPT-OSS w 0.07</td>
@@ -8944,21 +9196,21 @@ then scores <strong>0.906</strong> in CV, below the red flag and close to the le
 </div>
 </div>
 </div>
-<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=f280ca0e">
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=2035a5c9">
 <div class="jp-Cell-inputWrapper" tabindex="0">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
-<p><strong>The honest reading:</strong> with real event rates, every leaderboard decision falls within noise.
-Our CV as run failed the ceiling check, and the window-free CV now passes it. The mechanism
-supports the direction of the LLM gains, not their size. To make the claim credible, score HeLM
-on the window-free training folds, fix weights in advance, and spend fewer uploads.</p>
+<p><strong>The honest reading:</strong> with real event rates, every leaderboard decision falls within noise,
+and the one we could replicate failed. Our CV as run failed the ceiling check, and the
+window-free CV passes it. The weak-ranker mechanism is real. Here, the LLM's errors were too
+close to the base's for it to help.</p>
 </div>
 </div>
 </div>
 </div></section></section><section><section>
-<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=97c3e681">
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=39f19896">
 <div class="jp-Cell-inputWrapper" tabindex="0">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -8968,17 +9220,17 @@ on the window-free training folds, fix weights in advance, and spend fewer uploa
 <li><strong>Uncalibrated:</strong> the LLM scores rank patients. They are not risks, and are never reported as such.</li>
 <li><strong>Cost and drift:</strong> two calls per patient, and a hosted model can change under you. Store the
 raw scores and the model tag with each run.</li>
-<li><strong>Unmeasured locally:</strong> GPT-OSS was never run on the training set, so its blend gain has no CV
-estimate. Label it as a leaderboard number, not a validated one.</li>
+<li><strong>Replicated and failed:</strong> scored on the training set, GPT-OSS at weight 0.07 slightly lowers
+the leak-free CV. Its leaderboard gain was noise on 127 patients.</li>
 <li><strong>Small gate:</strong> 127 public patients hold only a handful of hepatic events, so they resolve
 only gains larger than most of ours.</li>
-<li><strong>Leaky CV:</strong> the pipeline's CV reads follow-up length. Quote the window-free CV, 0.906, instead.</li>
+<li><strong>Leaky CV:</strong> the pipeline's CV reads follow-up length. Quote the window-free CV, 0.902, instead.</li>
 </ul>
 </div>
 </div>
 </div>
 </div></section></section><section><section>
-<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=3ae0ff0f">
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=cd6520ee">
 <div class="jp-Cell-inputWrapper" tabindex="0">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -9024,7 +9276,7 @@ only gains larger than most of ours.</li>
 </div>
 </div>
 </div></section></section><section><section>
-<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=ba2ec87b">
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=c902f7dc">
 <div class="jp-Cell-inputWrapper" tabindex="0">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>

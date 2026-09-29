@@ -35,3 +35,5 @@ reference_archive/
 !talk/data/leaderboard.csv
 !talk/data/cv_scores.csv
 !talk/data/cohort_stats.csv
+!talk/data/cv_folds.csv
+!talk/data/cv_tests.csv
