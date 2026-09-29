@@ -30,3 +30,6 @@ ablation_finetune_efficientnet_results.csv
 
 # Quarantined reference material recovered locally but not portfolio-owned
 reference_archive/
+
+# Talk score tables: aggregates only, enforced by talk/test_talk_data_safety.py
+!talk/data/*.csv
