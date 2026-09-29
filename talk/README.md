@@ -30,26 +30,38 @@ python -m unittest test_talk_data_safety.py
 say so. To add them:
 
 1. Place the challenge CSVs under `data/` and run `python talk/export_scores.py`. Pass
-   `--seeds 3` for a quicker run. If `ablation_finetune_efficientnet_results.csv` exists in the repo
+   `--seeds 3` for a quicker run. It runs the repo's CV twice: as the pipeline runs it, and
+   window-free. The window-free run drops every feature computed over the observation window,
+   such as visit counts, missing rates and age summaries other than first-visit age. The pipeline
+   keeps `Age_first` and `Age_last`, and for censored patients their difference is the follow-up
+   time. A leak-probe row scores that span alone. If `ablation_finetune_efficientnet_results.csv` exists in the repo
    root, its `cox-sgd-none-fuse` row is included.
 2. `talk/data/leaderboard.csv` holds eight hand-picked leaderboard milestones from
    `talk/data/CHALLENGE_SUBS.md`, the full upload history. Each one maps to this repo's pipeline.
    The history's top scores (0.931 and 0.930) came from runs outside this repo, so the talk does
    not claim them. GPT-OSS was never scored on the training set, so its blend gain exists only as
    a leaderboard number.
-3. Re-execute the notebook and rebuild the slides.
+3. The export also writes `data/cohort_stats.csv`: patient and event counts only. The
+   false-positive gate section then uses real event rates instead of assumed ones (10% hepatic,
+   8% death).
+4. Re-execute the notebook and rebuild the slides.
+
+**False-positive gates.** Section 8 and `gates.py` define five criteria a leaderboard gain must
+clear: resolution, multiplicity, mechanism, ceiling and replication. They are applied to our own
+upload decisions. The public leaderboard scored 30% of the 423 test patients, about 127.
 
 **Timing (50 min):**
-- hook and the argument: 5 min
-- objective and rank blending: 4 min
-- data and the leakage check: 5 min
-- tabular base: 4 min
-- serializing a patient and split prompts: 5 min
-- why a weak ranker helps: 8 min
-- orthogonality checks: 4 min
-- the two-stage blend: 3 min
-- limits, generalising and the checklist: 6 min
-- Q&A: 6 min
+- hook and the argument: 4 min
+- objective and rank blending: 3 min
+- data and the leakage check: 4 min
+- tabular base: 3 min
+- serializing a patient and split prompts: 4 min
+- why a weak ranker helps: 7 min
+- orthogonality checks: 3 min
+- the two-stage blend: 2 min
+- false-positive gates and the scorecard: 9 min
+- limits, generalising and the checklist: 4 min
+- Q&A: 7 min
 
 Every code cell runs in seconds on a CPU, offline and deterministic. No LLM is called live. Keep
 the rendered `.slides.html` as a fallback in case the kernel fails.

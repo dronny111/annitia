@@ -63,7 +63,8 @@ C = S.cohort(2000, seed=0)                          # the synthetic cohort used 
 # 5. **Why a weak ranker helps:** error correlation is the lever.
 # 6. **Checking orthogonality** before spending API calls.
 # 7. **The two-stage blend** we submitted.
-# 8. **Limits** and honest reporting.
+# 8. **False-positive gates:** five criteria, applied to our own decisions.
+# 9. **Limits** and honest reporting.
 
 # %% slideshow={"slide_type": "slide"}
 cv, lb = csv_rows("cv_scores.csv"), csv_rows("leaderboard.csv")
@@ -118,6 +119,26 @@ print(f"rank 50/50 average   {cidx(ev, t, rank_blend({'tab': tab, 'llm': llm}, {
 # One row per patient, up to 22 visits, each with biomarkers such as ALT, platelets, FibroScan
 # stiffness and FibroTest. Visits are irregular, non-invasive tests are often missing, and most
 # patients never have the event (right censoring).
+
+# %% [markdown] slideshow={"slide_type": "subslide"}
+# ### What each column means
+# From the challenge data dictionary, lightly edited. Visit columns carry a suffix `_v1` to `_v22`.
+#
+# | Group | Variables | Meaning |
+# |---|---|---|
+# | Baseline | `gender`, `T2DM`, `Hypertension`, `Dyslipidaemia` | biological sex (coded), type 2 diabetes, hypertension, dyslipidaemia |
+# | Baseline | `bariatric_surgery`, `bariatric_surgery_age` | bariatric surgery, and age at surgery |
+# | Per visit | `Age`, `BMI` | age in years, body mass index |
+# | Liver labs | `alt`, `ast`, `ggt`, `bilirubin`, `plt` | ALAT (TGP), ASAT (TGO), gamma-GT, bilirubin, platelets |
+# | Metabolic labs | `gluc_fast`, `triglyc`, `chol` | fasting glucose, triglycerides, cholesterol |
+# | Non-invasive tests | `fibs_stiffness_med_BM_1` | median liver stiffness (FibroScan) |
+# | Non-invasive tests | `fibrotest_BM_2` | fibrosis probability score (FibroTest) |
+# | Non-invasive tests | `aixp_aix_result_BM_3` | Aixplorer liver stiffness |
+# | Outcomes | `evenements_hepatiques_majeurs`, `evenements_hepatiques_age_occur` | composite liver-related outcome, and age at the first event |
+# | Outcomes | `death`, `death_age_occur` | all-cause death, and age at death |
+#
+# Both targets are risk scores to rank: `risk_hepatic_event` and `risk_death`. Event times are
+# ages, so follow-up runs from the first visit's age to the event or last-visit age.
 
 # %% slideshow={"slide_type": "subslide"}
 fig, (a1, a2) = plt.subplots(1, 2, figsize=(10, 3.6))
@@ -185,8 +206,9 @@ print("baseline visit only:");                        fit_and_score([c for c in 
 # last values, slopes and even whether a slope exists all encode how long follow-up lasted. The
 # baseline-only model sits just under the truth, as an honest model should.
 #
-# The real pipeline drops direct proxies (`follow_up_years`, `Age_delta`) and masks visits after the
-# event. **Transfer:** compare every model against an oracle or a baseline-only model.
+# The real pipeline drops `follow_up_years` and `Age_delta` and masks visits after the event. But it
+# keeps `Age_first` and `Age_last`, and their difference *is* the follow-up time. Section 8 shows
+# what that did to our CV. **Transfer:** compare every model against an oracle or a baseline-only model.
 
 # %% [markdown] slideshow={"slide_type": "slide"}
 # ## 4 · Serializing a patient for an LLM
@@ -292,36 +314,243 @@ for name, s in (("base", base_r), ("image", img_r), ("LLM", llm_r), ("stage 1", 
 from IPython.display import Markdown
 if cv or lb:
     md = "| source | model | score |\n|---|---|---|\n"
-    md += "".join(f"| CV (measured) | {r['model']} | {float(r['weighted']):.4f} |\n" for r in cv)
+    label = {"cv": "10-fold CV, as run", "cv_clean": "10-fold CV, window-free", "proxy": "CV leak probe"}
+    md += "".join(f"| {label.get(r['stage'], r['stage'])} | {r['model']} | {float(r['weighted']):.4f} |\n" for r in cv)
     md += "".join(f"| leaderboard | {r['submission']} | {float(r['public_score']):.4f} |\n" for r in lb)
-    display(Markdown("**Our real numbers**\n\n" + md))
+    note = ("\n*CV as run reads follow-up length, a leak that section 8 dissects. The window-free rows"
+            " drop every feature computed over the observation window.*") if cv else ""
+    display(Markdown("**Our real numbers**\n\n" + md + note))
 else:
     display(Markdown("*Real numbers appear here after `python talk/export_scores.py` has run on the "
                      "challenge data. Leaderboard scores go in `talk/data/leaderboard.csv`.*"))
 
 # %% [markdown] slideshow={"slide_type": "slide"}
-# ## 8 · Limits and honest reporting
+# ## 8 · Gates that say yes too easily
+# A **false-positive gate** declares a change real when it is not. Our gate was the public
+# leaderboard, and it is **deterministic**: re-uploading a file gives the identical score. So the
+# risk is not measurement noise. It is overfitting a fixed sample of **127 patients** (30% of 423).
+#
+# A change passes only if it clears all five criteria:
+# 1. **Resolution:** the gain beats 2 paired standard errors on the gate's own sample.
+# 2. **Multiplicity:** it beats the best of K null tries, about SE·√(2 ln K).
+# 3. **Mechanism:** it is no larger than error independence can deliver.
+# 4. **Ceiling:** the score stays below what is attainable.
+# 5. **Replication:** it shows up on independent evidence.
+
+# %% slideshow={"slide_type": "skip"}
+import gates as G
+N_TEST, N_PUBLIC = 423, round(0.3 * 423)
+stats = csv_rows("cohort_stats.csv")                 # aggregate event counts, once exported
+if stats:
+    RATES = {r["endpoint"]: float(r["events"]) / float(r["n_patients"]) for r in stats}
+    RATE_SRC = "measured on the training set"
+else:
+    RATES, RATE_SRC = {"hep": 0.10, "death": 0.08}, "assumed"
+CEILING = 0.95                   # calibration ceiling for the noise model
+RED_FLAG = 0.947                 # the repo's own rule: CV above this is treated as a leak
+CAL = {ep: G.calibration_cohort(CEILING, event_rate=RATES[ep]) for ep in RATES}
+sig = lambda c: G.sigma_from_c(CAL["hep"], c)        # C-index -> noise sd of a ranker
+def weighted_se(s_a, s_c, w, r=0.3, n=N_PUBLIC):
+    """Paired SE of the 0.7/0.3 metric's gain, endpoints treated as independent."""
+    se = {ep: G.paired_delta(CAL[ep], s_a, s_c, w, r, n)[1] for ep in CAL}
+    return float(np.sqrt(0.49 * se["hep"] ** 2 + 0.09 * se["death"] ** 2))
+
+# %% [markdown] slideshow={"slide_type": "subslide"}
+# ### 1 · Resolution: how small a gain can 127 patients see?
+
+# %%
+n_ev = round(RATES["hep"] * N_PUBLIC)
+print(f"event rates {RATE_SRC}: hepatic {RATES['hep']:.0%}, death {RATES['death']:.0%}"
+      f" -> about {n_ev} hepatic events in the public sample")
+print(f"one C-index of 0.89 (Hanley-McNeil): SE = {G.hanley_mcneil_se(0.89, n_ev, N_PUBLIC - n_ev):.3f}")
+s_base, s_oss = sig(0.8967), sig(0.7919)
+print("paired SE of a GPT-OSS-style blend gain (weight 0.07), weighted metric:")
+for name, n in (("public", N_PUBLIC), ("private", N_TEST - N_PUBLIC), ("whole test", N_TEST)):
+    se = weighted_se(s_base, s_oss, 0.07, n=n)
+    print(f"  {name:10s} n = {n:3d}: SE {se:.4f}, credible gain {2 * se:.4f}")
+
+# %% [markdown]
+# A paired difference is far tighter than a single score. With about five hepatic events in the
+# public sample, a credible gain still needs **about 0.01**.
+
+# %% [markdown] slideshow={"slide_type": "subslide"}
+# ### 2 · Multiplicity: the best of many tries looks good by construction
+
+# %%
+se_ref = weighted_se(s_base, s_oss, 0.07)
+for k in (5, 30, 272):
+    print(f"K = {k:3d} tries on one sample -> typical best null gain {G.null_max_gain(se_ref, k):.4f}")
+
+# 30 near-tied submissions, ranked on a 127-patient public split, judged on the other 296.
+z, ev_c, t_c = CAL["hep"]
+rng = np.random.default_rng(8); s_top = sig(0.93)
+core = z + s_top * rng.normal(size=len(z))
+subs = [core + 0.3 * s_top * rng.normal(size=len(z)) for _ in range(30)]
+hits, optimism = 0, []
+while len(optimism) < 100:
+    idx = rng.choice(len(z), N_TEST, replace=False); pub, prv = idx[:N_PUBLIC], idx[N_PUBLIC:]
+    if not ev_c[pub].any():                          # an event-free public split cannot be scored
+        continue
+    c_pub = [cidx(ev_c[pub], t_c[pub], s[pub]) for s in subs]
+    c_prv = [cidx(ev_c[prv], t_c[prv], s[prv]) for s in subs]
+    k = int(np.argmax(c_pub)); hits += k == int(np.argmax(c_prv)); optimism.append(c_pub[k] - c_prv[k])
+print(f"\npublic winner is also the private winner in {hits}% of splits;"
+      f" its public score is inflated by {np.mean(optimism):+.4f} on average")
+
+# %% [markdown]
+# **Real case:** the platform marked `submission (7)` best public at 0.9308 and
+# `new_rank_ensemble` best private, listed at 0.9301. We uploaded 272 times, so the public
+# winner being the wrong pick is the expected outcome, not bad luck.
+
+# %% [markdown] slideshow={"slide_type": "subslide"}
+# ### 3 · Mechanism: how much gain can complementarity deliver?
+# Model each ranker as truth plus noise of sd *s*. For two rankers with error correlation *r*,
+# the best blend puts value weight **(s₁² − r s₁s₂) / (s₁² + s₂² − 2r s₁s₂)** on the second, and
+# its noise variance is **s₁²s₂²(1 − r²) / (s₁² + s₂² − 2r s₁s₂)**. Each standalone C-index fixes
+# its *s*. First we check the formula against simulation.
+#
+# *Assumptions: a ceiling C-index of 0.95 maps each score to a noise level, and the weighted
+# metric is treated as one endpoint.*
+
+# %% slideshow={"slide_type": "subslide"}
+cal_syn = (C.true_hep.to_numpy(), C.hep_event.to_numpy(), C.hep_time.to_numpy())
+ev_s, t_s = cal_syn[1], cal_syn[2]
+for shared in (0.0, 0.3, 0.6):
+    tab, llm = S.rankers(cal_syn[0], seed=7, shared=shared)
+    s1, s2 = G.sigma_from_c(cal_syn, cidx(ev_s, t_s, tab)), G.sigma_from_c(cal_syn, cidx(ev_s, t_s, llm))
+    simulated = max(cidx(ev_s, t_s, (1 - w) * _rank01(tab) + w * _rank01(llm)) for w in W) - cidx(ev_s, t_s, tab)
+    predicted, w_star = G.predicted_gain(cal_syn, s1, s2, shared)
+    print(f"error corr {shared:.1f}: predicted best gain {predicted:+.4f} at w = {w_star:.2f}"
+          f" | simulated {simulated:+.4f}")
+
+# %% [markdown]
+# The formula tracks the simulation and overstates it by about 0.001. The coarse LLM scores add
+# ties that the Gaussian model does not describe. So the predicted gain is an **upper bound**.
+
+# %% slideshow={"slide_type": "subslide"}
+cases = (("Haiku into base", 0.8938, 0.7528, 0.05, 0.89834 - 0.89379),
+         ("GPT-OSS into EfficientNet base", 0.8967, 0.7919, 0.07, 0.90223 - 0.89665))
+R = np.linspace(0, 0.9, 10)
+fig, axs = plt.subplots(1, 2, figsize=(10, 3.4), sharey=True)
+for ax, (name, c_a, c_b, w, seen) in zip(axs, cases):
+    s1, s2 = sig(c_a), sig(c_b)
+    ax.plot(R, [G.predicted_gain(CAL["hep"], s1, s2, r, w)[0] for r in R], marker=".", label=f"predicted at w = {w}")
+    ax.plot(R, [G.predicted_gain(CAL["hep"], s1, s2, r)[0] for r in R], ls="--", label="predicted at best w")
+    se = weighted_se(s1, s2, w)
+    print(f"{name}: observed {seen:+.4f} | predicted at w = {w} with independent errors"
+          f" {G.predicted_gain(CAL['hep'], s1, s2, 0.0, w)[0]:+.4f}")
+    ax.axhspan(seen - 2 * se, seen + 2 * se, color="#f58518", alpha=0.15)
+    ax.axhline(seen, color="#f58518", label="observed ± 2 SE")
+    ax.axhline(0, c="grey", lw=1); ax.set_title(name, fontsize=10); ax.set_xlabel("error correlation r")
+axs[0].set_ylabel("gain in C-index"); axs[1].legend(fontsize=7)
+plt.suptitle("Observed gains exceed what even independent errors predict at the weight used", fontsize=10)
+plt.show()
+
+# %% [markdown]
+# At the weights we used, both observed gains are **larger than the prediction even at r = 0**,
+# as printed above. Independence cannot explain all of either gain. The rest is most likely noise
+# from the 127-patient sample.
+
+# %% [markdown] slideshow={"slide_type": "subslide"}
+# ### 4 · Ceiling and 5 · Replication
+# **Ceiling.** A score above what is attainable is a leak, not a win. Compare against the true
+# risk in simulation, a baseline-only model, or a red-flag threshold. Section 2 showed a model at
+# 0.914 against a true risk of 0.825. `ablation_finetune_efficientnet.py` flags CV above 0.947.
+#
+# **Replication.** A gain must show up on evidence the gate never saw: CV folds, the other
+# endpoint, or a held-out split. A sign test across folds is cheap.
+
+# %% slideshow={"slide_type": "subslide"}
+cv_by = {r["model"]: r for r in cv}
+lb_base = float(lb[0]["public_score"]) if lb else float("nan")
+if "xgb + cat rank blend" in cv_by:
+    c_cv = float(cv_by["xgb + cat rank blend"]["weighted"])
+    probe = cv_by.get("follow-up span alone (leak probe)")
+    print(f"tabular base: 10-fold CV {c_cv:.4f} | public leaderboard {lb_base:.4f} | gap {c_cv - lb_base:+.4f}")
+    print(f"red flag {RED_FLAG}: CV is {'ABOVE' if c_cv > RED_FLAG else 'below'} it")
+    clean = cv_by.get("xgb + cat rank blend, window-free")
+    if clean:
+        print(f"same base, window-free features: CV {float(clean['weighted']):.4f}"
+              f" | gap to leaderboard {float(clean['weighted']) - lb_base:+.4f}")
+    if probe:
+        print(f"leak probe, follow-up span alone: CV {float(probe['weighted']):.4f}"
+              f" (hepatic {float(probe['c_hep']):.3f}, death {float(probe['c_death']):.3f})")
+    nh, nd = round(RATES["hep"] * N_PUBLIC), round(RATES["death"] * N_PUBLIC)
+    se_one = np.sqrt(0.49 * G.hanley_mcneil_se(lb_base, nh, N_PUBLIC - nh) ** 2
+                     + 0.09 * G.hanley_mcneil_se(lb_base, nd, N_PUBLIC - nd) ** 2)
+    print(f"one public score's SE ~ {se_one:.3f}, so a CV-to-leaderboard gap under"
+          f" {2 * se_one:.3f} proves nothing by itself")
+    n_hep = next((float(r["events"]) for r in stats if r["endpoint"] == "hep"), None) if stats else None
+    if n_hep:
+        k = round(n_hep / 10); print(f"about {k} hepatic events per CV fold: one fold's SE ~"
+                                     f" {G.hanley_mcneil_se(0.96, k, 125 - k):.3f}")
+else:
+    print("run talk/export_scores.py on the challenge data to fill this slide")
+
+# %% [markdown]
+# **Our CV was a false-positive gate.** The follow-up span alone outscores the whole model, so the
+# model is mostly reading how long patients were followed. The CV also sits above the repo's own red
+# flag. The leaderboard gap alone could not show this: one public score is too noisy. The leak
+# probe and the ceiling did. With about five events per fold, a perfect fold of 1.000 is noise too.
+#
+# **The fix:** drop every feature computed over the observation window, 24 in all. The same base
+# then scores **0.906** in CV, below the red flag and close to the leaderboard's 0.894.
+
+# %% [markdown] slideshow={"slide_type": "subslide"}
+# ### A cheap replication check
+
+# %%
+from scipy.stats import binomtest
+tab, llm = S.rankers(cal_syn[0], seed=21, shared=0.1)
+folds = np.array_split(np.random.default_rng(21).permutation(len(tab)), 10)
+blend = 0.93 * _rank01(tab) + 0.07 * _rank01(llm)
+d = [cidx(ev_s[f], t_s[f], blend[f]) - cidx(ev_s[f], t_s[f], tab[f]) for f in folds]
+k = sum(x > 0 for x in d)
+print(f"blend beats base in {k} of 10 folds; sign-test p = {binomtest(k, 10, 0.5, alternative='greater').pvalue:.3f}")
+
+# %% [markdown]
+# Our HeLM scores were never run on the training set, so **no LLM gain here has a CV replicate**.
+
+# %% [markdown] slideshow={"slide_type": "subslide"}
+# ### The scorecard: our own leaderboard decisions
+
+# %%
+# (decision, gain seen, K tries for that decision in the upload history, base C, added-model C, weight)
+decisions = [("Haiku HeLM into base", 0.89834 - 0.89379, 8, 0.8938, 0.7528, 0.05),
+             ("EfficientNet into base", 0.89665 - 0.89379, 6, 0.8938, 0.8443, 0.02),
+             ("GPT-OSS into EfficientNet base", 0.90223 - 0.89665, 5, 0.8967, 0.7919, 0.07),
+             ("Final two-stage over GPT-OSS w 0.07", 0.90364 - 0.90223, 2, None, None, None),
+             ("Final two-stage over tabular base", 0.90364 - 0.89379, 60, None, None, None),
+             ("Best public over best private", 0.93081 - 0.93006, 272, None, None, None)]
+md = "| decision | gain | SE | gain / SE | K | bar after K | mechanism max | verdict |\n|---|---|---|---|---|---|---|---|\n"
+for name, gain, k, c_a, c_b, w in decisions:
+    if c_a:
+        s1, s2 = sig(c_a), sig(c_b)
+        se, mech = weighted_se(s1, s2, w), G.predicted_gain(CAL["hep"], s1, s2, 0.0)[0]
+    else:
+        se, mech = se_ref, np.inf                  # no mechanism model: generic paired SE
+    v = G.verdict(gain, se, k, mech, replicated=False)
+    mech_txt = "n/a" if np.isinf(mech) else f"{mech:+.4f}"
+    md += (f"| {name} | {gain:+.4f} | {se:.4f} | {gain / se:.1f} | {k} | {G.null_max_gain(se, k):.4f}"
+           f" | {mech_txt} | **{v}** |\n")
+display(Markdown(md))
+
+# %% [markdown]
+# **The honest reading:** with real event rates, every leaderboard decision falls within noise.
+# Our CV as run failed the ceiling check, and the window-free CV now passes it. The mechanism
+# supports the direction of the LLM gains, not their size. To make the claim credible, score HeLM
+# on the window-free training folds, fix weights in advance, and spend fewer uploads.
+
+# %% [markdown] slideshow={"slide_type": "slide"}
+# ## 9 · Limits and honest reporting
 # - **Uncalibrated:** the LLM scores rank patients. They are not risks, and are never reported as such.
 # - **Cost and drift:** two calls per patient, and a hosted model can change under you. Store the
 #   raw scores and the model tag with each run.
 # - **Unmeasured locally:** GPT-OSS was never run on the training set, so its blend gain has no CV
 #   estimate. Label it as a leaderboard number, not a validated one.
-# - **Weight selection bias:** a blend weight picked on a small split looks better than it is.
-
-# %% slideshow={"slide_type": "subslide"}
-tab, llm = S.rankers(truth, seed=13, shared=0.3)
-c_of = lambda idx, w: cidx(ev.iloc[idx], t.iloc[idx], (1 - w) * _rank01(tab[idx]) + w * _rank01(llm[idx]))
-rng = np.random.default_rng(13); picked, val_gain, test_gain = [], [], []
-for _ in range(40):                                  # tune the weight on 150 patients, test on the rest
-    idx = rng.permutation(len(truth)); v, rest = idx[:150], idx[150:]
-    k = int(np.argmax([c_of(v, w) for w in W])); picked.append(W[k])
-    val_gain.append(c_of(v, W[k]) - c_of(v, 0)); test_gain.append(c_of(rest, W[k]) - c_of(rest, 0))
-print(f"weights picked range {min(picked):.2f} to {max(picked):.2f}")
-print(f"mean gain on the tuning split {np.mean(val_gain):+.4f} | on held-out patients {np.mean(test_gain):+.4f}")
-
-# %% [markdown]
-# **Practice:** fix a small grid, prefer round weights, and trust a gain only where held-out
-# data or the leaderboard confirm it.
+# - **Small gate:** 127 public patients hold only a handful of hepatic events, so they resolve
+#   only gains larger than most of ours.
+# - **Leaky CV:** the pipeline's CV reads follow-up length. Quote the window-free CV, 0.906, instead.
 
 # %% [markdown] slideshow={"slide_type": "slide"}
 # ## Generalising the idea
@@ -341,4 +570,6 @@ print(f"mean gain on the tuning split {np.mean(val_gain):+.4f} | on held-out pat
 # - [ ] Is the candidate judged by its gain **in the ensemble**, not alone?
 # - [ ] Did I check rank correlation and unique values before paying for every call?
 # - [ ] Were blend weights fixed on a coarse grid and confirmed on held-out data?
+# - [ ] Does the gain beat 2 paired SEs on the gate's sample, and the bar for K tries?
+# - [ ] Is the gain no larger than error independence can deliver?
 # - [ ] Is every number labelled measured, leaderboard or synthetic?

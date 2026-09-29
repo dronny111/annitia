@@ -20,7 +20,8 @@ class TalkDataSafetyTest(unittest.TestCase):
 
     def test_score_tables_hold_aggregates_only(self):
         allowed = {"cv_scores.csv": "stage,model,c_hep,c_death,weighted",
-                   "leaderboard.csv": "submission,public_score"}
+                   "leaderboard.csv": "submission,public_score",
+                   "cohort_stats.csv": "endpoint,n_patients,events"}
         for path in (TALK / "data").glob("*.csv"):
             self.assertEqual(path.read_text().splitlines()[0], allowed.get(path.name), path)
 
@@ -38,6 +39,32 @@ class TalkDataSafetyTest(unittest.TestCase):
                 self.assertTrue(handle.readline())
         finally:
             builtins.open = original
+
+
+class GateMathTest(unittest.TestCase):
+    """The false-positive gate formulas in talk/gates.py."""
+
+    def setUp(self):
+        sys.path.insert(0, str(TALK))
+        import gates
+        self.G = gates
+
+    def test_blend_weights(self):
+        G = self.G
+        self.assertAlmostEqual(G.optimal_value_weight(1.0, 1.0, 0.0), 0.5)
+        v = G.optimal_value_weight(1.0, 2.0, 1.0)             # perfectly shared errors
+        self.assertAlmostEqual(G.blend_sigma(1.0, 2.0, 1.0, v), 1.0)   # no gain possible
+        self.assertLess(G.blend_sigma(1.0, 2.0, 0.0, G.optimal_value_weight(1.0, 2.0, 0.0)), 1.0)
+        w = G.value_to_rank_weight(0.2, 0.6, 1.4)
+        self.assertAlmostEqual(G.rank_to_value_weight(w, 0.6, 1.4), 0.2)
+
+    def test_noise_bars(self):
+        G = self.G
+        self.assertLess(G.null_max_gain(0.003, 5), G.null_max_gain(0.003, 272))
+        self.assertLess(G.hanley_mcneil_se(0.9, 40, 400), G.hanley_mcneil_se(0.9, 10, 100))
+        self.assertEqual(G.verdict(0.001, 0.003, 5, 0.01, True), "within noise")
+        self.assertEqual(G.verdict(0.05, 0.003, 5, 0.01, True), "implausible: no mechanism")
+        self.assertEqual(G.verdict(0.009, 0.003, 5, 0.01, True), "credible")
 
 
 if __name__ == "__main__":

@@ -32,4 +32,6 @@ ablation_finetune_efficientnet_results.csv
 reference_archive/
 
 # Talk score tables: aggregates only, enforced by talk/test_talk_data_safety.py
-!talk/data/*.csv
+!talk/data/leaderboard.csv
+!talk/data/cv_scores.csv
+!talk/data/cohort_stats.csv
