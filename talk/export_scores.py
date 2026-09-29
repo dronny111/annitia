@@ -10,7 +10,6 @@ no patient IDs, rows or predictions leave this script.
 import argparse
 import csv
 import os
-import re
 import sys
 from pathlib import Path
 
@@ -27,15 +26,17 @@ import push_score_allout as P                    # noqa: E402
 from feature_revolution import load_and_prepare  # noqa: E402
 
 
-# Features computed over the observation window's length: visit counts and densities, missing
-# rates across visit slots, counts over visits, and every age summary except first-visit age.
-# For censored patients, last-visit age minus first-visit age *is* the follow-up time.
-WINDOW = re.compile(r"^Age_(?!first$)|^age_at_last_visit$|^n_visits$|^n_nit_visits$|^visit_density$"
-                    r"|_missing_rate$|_count$")
+# What the pipeline dropped before the leak was fixed in feature_revolution.load_and_prepare.
+OLD_PROXIES = ("follow_up_years", "Age_delta")
 
 
-def window_free(X):
-    return {k: v.drop(columns=[c for c in v.columns if WINDOW.search(c)]) for k, v in X.items()}
+def features(drop_window: bool):
+    """Feature matrices, window-free (the fixed pipeline) or as the pipeline ran before the fix."""
+    d = load_and_prepare(feature_mode=P.FEATURE_MODE, drop_window=drop_window)
+    X = {k: d[f"X_{k}"].replace([np.inf, -np.inf], np.nan) for k in ("hep", "death")}
+    if not drop_window:
+        X = {k: v.drop(columns=[c for c in OLD_PROXIES if c in v.columns]) for k, v in X.items()}
+    return d, X
 
 
 def cindex(y, score):
@@ -87,13 +88,12 @@ def main():
     ap.add_argument("--seeds", type=int, default=10)
     args = ap.parse_args()
 
-    data = load_and_prepare(feature_mode=P.FEATURE_MODE)
-    X = {k: data[f"X_{k}"].replace([np.inf, -np.inf], np.nan) for k in ("hep", "death")}
-    X = {k: v.drop(columns=list(P.LABEL_PROXIES & set(v.columns))) for k, v in X.items()}
+    data, X = features(drop_window=False)                             # as the pipeline ran
+    _, X_clean = features(drop_window=True)                           # the fixed pipeline
     y = {"hep": data["y_hepatic"], "death": data["y_death"]}
 
-    rows = cv_rows(X, y, args.seeds, "cv", "")                        # as the pipeline runs
-    rows += cv_rows(window_free(X), y, args.seeds, "cv_clean", ", window-free")
+    rows = cv_rows(X, y, args.seeds, "cv", "")
+    rows += cv_rows(X_clean, y, args.seeds, "cv_clean", ", window-free")
 
     effnet = ROOT / "ablation_finetune_efficientnet_results.csv"
     if effnet.is_file():                          # aggregate ablation table, one row per cell

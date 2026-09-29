@@ -42,7 +42,6 @@ SEEDS_10 = SEEDS_30[:10]
 
 N_SPLITS = 10
 FEATURE_MODE = "engineered_clinical_interactions"
-LABEL_PROXIES = {"follow_up_years", "Age_delta"}
 
 
 # ── Model fitting ──────────────────────────────────────────────────────
@@ -341,12 +340,6 @@ def main():
     y_hep = data["y_hepatic"]
     y_death = data["y_death"]
 
-    proxy_present = LABEL_PROXIES & set(X_hep.columns)
-    if proxy_present:
-        print(f"  Removing label proxies: {proxy_present}")
-        X_hep = X_hep.drop(columns=list(proxy_present), errors="ignore")
-        X_death = X_death.drop(columns=list(proxy_present), errors="ignore")
-
     print(f"  Hepatic: {X_hep.shape[0]} pts × {X_hep.shape[1]} feats ({y_hep['event'].sum()} events)")
     print(f"  Death:   {X_death.shape[0]} pts × {X_death.shape[1]} feats ({y_death['event'].sum()} events)")
 
@@ -374,7 +367,6 @@ def main():
     # ── Submissions ────────────────────────────────────────────────────
     if args.submit and data["X_test"] is not None:
         X_test = data["X_test"].replace([np.inf, -np.inf], np.nan)
-        X_test = X_test.drop(columns=list(LABEL_PROXIES & set(X_test.columns)), errors="ignore")
         trustii_ids = data["trustii_ids"]
 
         helm_path = "submission_helm_haiku_zeroshot_precomputed.csv"

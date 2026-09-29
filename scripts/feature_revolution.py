@@ -51,6 +51,12 @@ OUTCOME_COLS = [
     "death_age_occur",
 ]
 
+# Features computed over the observation window. Follow-up ends at the event or at censoring, so
+# for censored patients last-visit age minus first-visit age *is* the target time: the span alone
+# scores CV C = 0.96. Any of these lets a model read follow-up length instead of risk.
+WINDOW_FEATURES = re.compile(
+    r"^follow_up_years$|^Age_(?!first$)|^age_at_last_visit$|^age_x_fibroscan$|^n_visits$"
+    r"|^n_nit_visits$|^visit_density$|^nit_coverage_ratio$|_missing_rate$|_count$")
 VOLATILITY_SUFFIXES = ("_std", "_range")
 DERIVED_PREFIXES = ("FIB4_", "APRI_", "AST_ALT_ratio_")
 
@@ -245,7 +251,7 @@ def find_data_files() -> tuple[Path, Path | None]:
     return train_path, test_path
 
 
-def load_and_prepare(feature_mode: str = "engineered_only") -> dict:
+def load_and_prepare(feature_mode: str = "engineered_only", drop_window: bool = True) -> dict:
     """Load data and prepare feature matrices.
 
     feature_mode:
@@ -253,6 +259,8 @@ def load_and_prepare(feature_mode: str = "engineered_only") -> dict:
       - "engineered_only": Static + engineered summaries only (~124 features)
       - "engineered_clinical": Engineered + clinical thresholds
       - "engineered_clinical_interactions": Engineered + clinical + visit patterns + interactions
+
+    drop_window: remove WINDOW_FEATURES, which leak follow-up length. False only to study the leak.
     """
     train_path, test_path = find_data_files()
     df_raw = pd.read_csv(train_path)
@@ -461,6 +469,12 @@ def load_and_prepare(feature_mode: str = "engineered_only") -> dict:
     X_death = X_death.replace([np.inf, -np.inf], np.nan)
     if X_test is not None:
         X_test = X_test.replace([np.inf, -np.inf], np.nan)
+
+    if drop_window:
+        leaky = lambda X: [c for c in X.columns if WINDOW_FEATURES.search(c)]
+        X_hep, X_death = X_hep.drop(columns=leaky(X_hep)), X_death.drop(columns=leaky(X_death))
+        if X_test is not None:
+            X_test = X_test.drop(columns=leaky(X_test))
 
     trustii_ids = None
     if df_test_raw is not None and "trustii_id" in df_test_raw.columns:

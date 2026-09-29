@@ -21,7 +21,9 @@ class TalkDataSafetyTest(unittest.TestCase):
     def test_score_tables_hold_aggregates_only(self):
         allowed = {"cv_scores.csv": "stage,model,c_hep,c_death,weighted",
                    "leaderboard.csv": "submission,public_score",
-                   "cohort_stats.csv": "endpoint,n_patients,events"}
+                   "cohort_stats.csv": "endpoint,n_patients,events",
+                   "cv_folds.csv": "comparison,endpoint,fold,delta",
+                   "cv_tests.csv": "comparison,estimate,se"}
         for path in (TALK / "data").glob("*.csv"):
             self.assertEqual(path.read_text().splitlines()[0], allowed.get(path.name), path)
 
@@ -65,6 +67,19 @@ class GateMathTest(unittest.TestCase):
         self.assertEqual(G.verdict(0.001, 0.003, 5, 0.01, True), "within noise")
         self.assertEqual(G.verdict(0.05, 0.003, 5, 0.01, True), "implausible: no mechanism")
         self.assertEqual(G.verdict(0.009, 0.003, 5, 0.01, True), "credible")
+
+
+class WindowLeakRuleTest(unittest.TestCase):
+    """feature_revolution.WINDOW_FEATURES must catch follow-up-length features and nothing clinical."""
+
+    def test_rule(self):
+        sys.path.insert(0, str(ROOT / "scripts"))
+        from feature_revolution import WINDOW_FEATURES as W
+        for leaky in ("Age_last", "Age_delta", "Age_mean", "follow_up_years", "age_at_last_visit",
+                      "n_visits", "visit_density", "FibroScan_missing_rate", "alt_above_uln_count"):
+            self.assertTrue(W.search(leaky), leaky)
+        for clinical in ("Age_first", "FibroScan_last", "Platelets_slope", "had_fibrotest", "T2DM"):
+            self.assertIsNone(W.search(clinical), clinical)
 
 
 if __name__ == "__main__":

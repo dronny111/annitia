@@ -59,6 +59,16 @@ scripts/
 ```
 
 
+## Follow-up leak (fixed)
+
+`feature_revolution.load_and_prepare` now drops features computed over each patient's observation
+window, such as visit counts, missing rates and last-visit age (`WINDOW_FEATURES`). For censored
+patients, last-visit age minus first-visit age equals the target time, so these features let a
+model read follow-up length. That span alone scored a CV C-index of 0.96. The fixed 10-seed base
+scores 0.902 in CV, close to its public leaderboard score of 0.894. Submissions made before this
+fix were trained with the leaky features, so rerunning the steps below will not reproduce them
+exactly.
+
 ## Expected Data
 
 Place the official challenge CSVs under `data/`:

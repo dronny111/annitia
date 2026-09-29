@@ -146,7 +146,7 @@ def serialize_patient(row: pd.Series, fib4: float | None) -> str:
         f"Non-invasive tests (NITs — liver fibrosis staging):",
         f"  FibroScan liver stiffness (kPa; F2=7.0, F3=9.5, F4/cirrhosis=12.5): {_fmt(fs, ' kPa')}",
         f"  FibroTest composite score (0–1; F4 >0.74): {_fmt(ft)}",
-        f"  AIxplorer arterial stiffness: {_fmt(aix)}",
+        f"  Aixplorer liver stiffness: {_fmt(aix)}",
         f"  FIB-4 index (low <1.30, high >2.67): {fib4 if fib4 else 'unavailable'}",
         f"",
         f"Liver biochemistry:",
