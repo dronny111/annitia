@@ -1,4 +1,7 @@
-# The Model That Lost Alone and Won the Ensemble: a talk with a live Jupyter walkthrough
+# When a Weak AI Model Helps: LLM Risk Rankers for Liver Disease
+
+*Orthogonal LLM Rankers and Agentic Scaffolding for MASLD Survival Modeling.* A talk with a live
+Jupyter walkthrough.
 
 A 50-minute technical talk on this repository's ANNITIA 2026 solution. A reasoning LLM that reads
 a patient's record as clinical text is a weak survival model on its own. On the leaderboard it

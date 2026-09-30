@@ -11,8 +11,8 @@
 # ---
 
 # %% [markdown] slideshow={"slide_type": "slide"}
-# # The Model That Lost Alone and Won the Ensemble
-# ## An LLM as an orthogonal ranker for survival prediction
+# # When a Weak AI Model Helps: LLM Risk Rankers for Liver Disease
+# ## Orthogonal LLM Rankers and Agentic Scaffolding for MASLD Survival Modeling
 #
 # A case study: the ANNITIA 2026 challenge. Predict major hepatic events and all-cause death
 # from irregular longitudinal records of MASLD patients (metabolic dysfunction-associated
