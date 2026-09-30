@@ -568,11 +568,8 @@ else:
     print("run talk/helm_train_scores.py, then talk/helm_cv.py, to fill this slide")
 
 # %% [markdown]
-# **It does not replicate.** On 1,253 patients, the blend loses to the base in most folds. The
-# mechanism predicts exactly this if the LLM's errors correlate with the base's at about 0.5. At
-# this gap in standalone skill, a weak ranker helps only when its errors are nearly independent.
-# *Differences from the submission: window-free text, the corrected post-event masking, and the
-# tabular base in place of the EfficientNet base.*
+# **It does not replicate.** The blend loses in most folds, as the mechanism predicts if the errors
+# correlate near 0.5. *Not an exact replay: window-free text, stricter masking, tabular base.*
 
 # %% [markdown] slideshow={"slide_type": "subslide"}
 # ### One prompt or two? Joint prediction of both endpoints
@@ -590,17 +587,23 @@ for label, stage, key in runs:
     r = {x["model"]: float(x["weighted"]) for x in cv if x["stage"] == stage}
     if r and key in tests:
         est, se = float(tests[key]["estimate"]), float(tests[key]["se"])
-        print(f"{label:13s} alone {r['GPT-OSS HeLM alone, window-free text']:.4f}"
-              f" | blend - base {est:+.4f} ± {se:.4f} ({est / se:+.1f} SE)")
+        print(f"{label:14s} alone {r['GPT-OSS HeLM alone, window-free text']:.3f} | gain {est:+.4f} ± {se:.4f}")
         shown += 1
 for key, label in (("helm_joint_vs_split_blend", "GPT-OSS joint - split"),
                    ("helm_nemotron_joint_vs_split_blend", "Nemotron joint - split"),
                    ("helm_medgemma_joint_vs_split_blend", "MedGemma joint - split")):
     if key in tests:
         est, se = float(tests[key]["estimate"]), float(tests[key]["se"])
-        print(f"{label:22s} {est:+.4f} ± {se:.4f} ({est / se:+.1f} SE)")
+        print(f"{label:22s} {est:+.4f} ± {se:.4f}")
 if shown <= 1:
     print("run talk/helm_train_scores.py for the joint, Nemotron and MedGemma variants, then talk/helm_cv.py")
+
+# %% [markdown] slideshow={"slide_type": "subslide"}
+# **No model or prompt clears the noise.** Reasoning helps the LLM alone: Nemotron with reasoning
+# on is the strongest, and the only blend with a positive point estimate. But it wins only 4 of 10
+# folds on each endpoint. The LLMs also agree with each other (rank correlation about 0.8) far more
+# than with the base, so swapping one LLM for another changes little of what it adds. For MedGemma,
+# the joint prompt is no better than split, within noise.
 
 
 # %% [markdown] slideshow={"slide_type": "subslide"}
@@ -655,6 +658,20 @@ display(Markdown(md))
 # | Credit or churn risk | boosted trees on tabular data | LLM over notes or transcripts | rank blend |
 # | Search and retrieval | a learned ranker | an LLM relevance judge | reciprocal rank fusion |
 # | Triage and alerting | rules and thresholds | an LLM reading free-text reports | ordered escalation |
+
+# %% [markdown] slideshow={"slide_type": "slide"}
+# ## Takeaways for Ghanaian researchers
+# - **Start with a model you can run yourself.** MedGemma 1.5 (3.3 GB) scored all 1,253 patients on
+#   a laptop in about 35 minutes, and no record left the machine.
+# - **Test cheaply before you pay.** Score three patients first, then check rank correlation with your
+#   model and the number of distinct scores. Free API tiers allow about 1,000 requests a day, so plan
+#   runs around them and save after every call.
+# - **Judge an LLM by what it adds to your model,** on your own held-out data, not by one leaderboard.
+#   127 patients could not tell our gain from noise.
+# - **Look for leaks in your own features first.** Here, the gap between first and last visit ages
+#   alone scored 0.96.
+# - **Know where your data goes.** Cloud and free endpoints may log prompts, so check the data terms
+#   before sending patient records.
 
 # %% [markdown] slideshow={"slide_type": "slide"}
 # ## The checklist

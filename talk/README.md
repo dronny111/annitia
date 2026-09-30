@@ -14,6 +14,9 @@ challenge CSV, a submission, out-of-fold predictions or `reference_archive/` rai
 - `annitia_talk.py`: the source (jupytext percent format), the file to review and edit
 - `annitia_talk.ipynb`: generated from it and executed headless for verification
 - `export_scores.py`: runs the repo's own cross-validation and writes `data/cv_scores.csv`
+- `helm_train_scores.py`: scores every training patient with an LLM (split or joint prompt;
+  Ollama or OpenRouter). Per-patient scores stay in the git-ignored `../data/`
+- `helm_cv.py`: tests each LLM blend inside the leak-free CV and writes aggregates only
 
 ```bash
 pip install -r talk/requirements.txt
@@ -53,18 +56,22 @@ say so. To add them:
 clear: resolution, multiplicity, mechanism, ceiling and replication. They are applied to our own
 upload decisions. The public leaderboard scored 30% of the 423 test patients, about 127.
 
-**Timing (50 min):**
-- hook and the argument: 4 min
+**Timing (50 min, 44 handout pages):**
+- hook and the argument: 3 min
 - objective and rank blending: 3 min
-- data and the leakage check: 4 min
-- tabular base: 3 min
-- serializing a patient and split prompts: 4 min
-- why a weak ranker helps: 7 min
-- orthogonality checks: 3 min
+- data, the column dictionary and the leakage check: 4 min
+- tabular base: 2 min
+- serializing a patient and the prompts: 3 min
+- why a weak ranker helps: 5 min
+- orthogonality checks: 2 min
 - the two-stage blend: 2 min
-- false-positive gates and the scorecard: 9 min
-- limits, generalising and the checklist: 4 min
-- Q&A: 7 min
+- false-positive gates, the five criteria: 7 min
+- the CV leak, its fix and the blend weight: 4 min
+- replication, other LLMs and the scorecard: 6 min
+- limits, takeaways and the checklist: 4 min
+- Q&A: 5 min
+
+If short on time, skip the synthetic replication check and the two-stage blend detail.
 
 Every code cell runs in seconds on a CPU, offline and deterministic. No LLM is called live. Keep
 the rendered `.slides.html` as a fallback in case the kernel fails.
