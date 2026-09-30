@@ -1,7 +1,6 @@
-# When a Weak AI Model Helps: LLM Risk Rankers for Liver Disease
+# LLM Risk Rankers and Agentic Scaffolding for Liver Disease Survival Modeling
 
-*Orthogonal LLM Rankers and Agentic Scaffolding for MASLD Survival Modeling.* A talk with a live
-Jupyter walkthrough.
+A talk with a live Jupyter walkthrough.
 
 A 50-minute technical talk on this repository's ANNITIA 2026 solution. A reasoning LLM that reads
 a patient's record as clinical text is a weak survival model on its own. On the leaderboard it
@@ -48,8 +47,8 @@ say so. To add them:
 2. `talk/data/leaderboard.csv` holds eight hand-picked leaderboard milestones from
    `talk/data/CHALLENGE_SUBS.md`, the full upload history. Each one maps to this repo's pipeline.
    The history's top scores (0.931 and 0.930) came from runs outside this repo, so the talk does
-   not claim them. GPT-OSS was never scored on the training set, so its blend gain exists only as
-   a leaderboard number.
+   not claim them. GPT-OSS's leaderboard blend gain was later tested on the training set
+   (`helm_train_scores.py`, `helm_cv.py`) and did not hold.
 3. The export also writes `data/cohort_stats.csv`: patient and event counts only. The
    false-positive gate section then uses real event rates instead of assumed ones (10% hepatic,
    8% death).
@@ -59,16 +58,16 @@ say so. To add them:
 clear: resolution, multiplicity, mechanism, ceiling and replication. They are applied to our own
 upload decisions. The public leaderboard scored 30% of the 423 test patients, about 127.
 
-**Timing (50 min, 44 handout pages):**
+**Timing (50 min, 47 handout pages):**
 - hook and the argument: 3 min
 - objective and rank blending: 3 min
 - data, the column dictionary and the leakage check: 4 min
 - tabular base: 2 min
-- serializing a patient and the prompts: 3 min
+- serializing a patient, the prompts and the harness: 4 min
 - why a weak ranker helps: 5 min
-- orthogonality checks: 2 min
+- rank-correlation checks: 2 min
 - the two-stage blend: 2 min
-- false-positive gates, the five criteria: 7 min
+- false-positive gates, the five criteria: 6 min
 - the CV leak, its fix and the blend weight: 4 min
 - replication, other LLMs and the scorecard: 6 min
 - limits, takeaways and the checklist: 4 min

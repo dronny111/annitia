@@ -11,8 +11,7 @@
 # ---
 
 # %% [markdown] slideshow={"slide_type": "slide"}
-# # When a Weak AI Model Helps: LLM Risk Rankers for Liver Disease
-# ## Orthogonal LLM Rankers and Agentic Scaffolding for MASLD Survival Modeling
+# # LLM Risk Rankers and Agentic Scaffolding for Liver Disease Survival Modeling
 #
 # A case study: the ANNITIA 2026 challenge. Predict major hepatic events and all-cause death
 # from irregular longitudinal records of MASLD patients (metabolic dysfunction-associated
@@ -60,9 +59,9 @@ C = S.cohort(2000, seed=0)                          # the synthetic cohort used 
 # 1. **Objective:** the metric only sees order, so we blend ranks.
 # 2. **Data:** wide, irregular, censored records.
 # 3. **Tabular base:** XGBoost AFT and CatBoost SurvivalAft.
-# 4. **Serializing a patient:** from a wide row to a clinical summary.
+# 4. **Serializing a patient:** from a wide row to a clinical summary, and the harness around the LLM.
 # 5. **Why a weak ranker helps:** error correlation is the lever.
-# 6. **Checking orthogonality** before spending API calls.
+# 6. **Checking rank correlation** before spending API calls.
 # 7. **The two-stage blend** we submitted.
 # 8. **False-positive gates:** five criteria, applied to our own decisions.
 # 9. **Limits** and honest reporting.
@@ -240,6 +239,80 @@ print(SCORE_PROMPT_HEPATIC.split("---", 1)[1].format(cot_instruction="").strip()
 # The model is GPT-OSS 120B, served through Ollama. Its 0-100 outputs are treated as **rankings**,
 # not probabilities, which is all a C-index needs.
 
+# %% [markdown] slideshow={"slide_type": "subslide"}
+# ### The scaffolding around the LLM
+# The model sees one prompt and returns one JSON object. Everything else is a harness we wrote:
+# it decides what the model may see, keeps a long run alive on free API tiers, and records every
+# score so a crash costs nothing. It is a fixed pipeline, not an autonomous agent: the model
+# picks no tools and no next steps. Shown here: the harness behind the leak-free replication
+# (`talk/helm_train_scores.py`).
+
+# %% slideshow={"slide_type": "skip"}
+from matplotlib.patches import FancyBboxPatch
+LEAK, MODEL, SAFE, PLAIN = "#fdd0a2", "#9ecae1", "#c7e9c0", "#eeeeee"
+def box(ax, x, y, text, fc, w=0.21, h=0.24):
+    ax.add_patch(FancyBboxPatch((x - w / 2, y - h / 2), w, h, boxstyle="round,pad=0.01", fc=fc, ec="#555"))
+    ax.text(x, y, text, ha="center", va="center", fontsize=8)
+def arrow(ax, a, b, label="", rad=0.0, dy=0.03):
+    ax.annotate("", xy=b, xytext=a, arrowprops=dict(arrowstyle="->", color="#555", connectionstyle=f"arc3,rad={rad}"))
+    if label:
+        ax.text((a[0] + b[0]) / 2, (a[1] + b[1]) / 2 + dy, label, ha="center", fontsize=7, color="#333")
+def canvas(title):
+    fig, ax = plt.subplots(figsize=(10, 4.2)); ax.axis("off"); ax.set_xlim(0, 1); ax.set_ylim(0, 1)
+    ax.set_title(title, fontsize=10)
+    for i, (fc, name) in enumerate(((LEAK, "leak guard"), (MODEL, "the model"), (SAFE, "reliability"))):
+        ax.add_patch(FancyBboxPatch((0.02 + 0.16 * i, 0.95), 0.025, 0.035, boxstyle="square,pad=0", fc=fc, ec="#555"))
+        ax.text(0.055 + 0.16 * i, 0.967, name, va="center", fontsize=7)
+    return ax
+
+def harness_flow():
+    ax = canvas("From a patient row to a stored score")
+    X, w, top, low = (0.13, 0.38, 0.63, 0.88), 0.21, 0.72, 0.32
+    for x, (t, fc) in zip(X, (("Patient row\nup to 22 visits", PLAIN), ("Mask visits\nafter the event", LEAK),
+                              ("Serialize: trajectories,\nthresholds, comorbidities", PLAIN),
+                              ("Strip follow-up length:\nvisit counts, age range", LEAK))):
+        box(ax, x, top, t, fc)
+    for x, (t, fc) in zip(X[::-1], (("Prompt\nsplit: one per endpoint\njoint: both at once", PLAIN),
+                                    ("LLM, temperature 0\nOllama or OpenRouter\nreasoning on or off", MODEL),
+                                    ("Parse JSON\nclip to 0-100\nmissing key -> 50", PLAIN),
+                                    ("Append row, flush\nrerun resumes", SAFE))):
+        box(ax, x, low, t, fc)
+    for a, b in zip(X, X[1:]):
+        arrow(ax, (a + w / 2, top), (b - w / 2, top)); arrow(ax, (b - w / 2, low), (a + w / 2, low))
+    arrow(ax, (X[3], top - 0.12), (X[3], low + 0.12))
+    arrow(ax, (X[2] + 0.05, low - 0.12), (X[2] - 0.05, low - 0.12), rad=-1.8)
+    ax.text(X[2] + 0.07, 0.1, "error or rate limit:\nback off and retry, up to 6 tries", fontsize=7)
+    plt.show()
+
+def harness_failures():
+    ax = canvas("What a failed call does: nothing is lost, nothing is faked")
+    box(ax, 0.1, 0.5, "Call the\nmodel", MODEL, w=0.14)
+    box(ax, 0.4, 0.8, "Write the row\nand flush", SAFE)
+    box(ax, 0.4, 0.5, "Rate limit (429)\nwait 15 s x 2^n, at most\n5 min, then retry", SAFE)
+    box(ax, 0.4, 0.18, "Other error\nwait 5 s x (n + 1)\nthen retry", SAFE)
+    box(ax, 0.68, 0.5, "6th limit: stop every\nworker, exit cleanly", SAFE)
+    box(ax, 0.68, 0.18, "6th error:\nrecord NaN", SAFE)
+    box(ax, 0.91, 0.34, "Rerun: drop NaN\nrows, skip scored\npatients", SAFE, w=0.16, h=0.3)
+    arrow(ax, (0.17, 0.58), (0.295, 0.8), "ok")
+    arrow(ax, (0.17, 0.47), (0.295, 0.47), "429", dy=-0.06)
+    arrow(ax, (0.17, 0.42), (0.295, 0.2), "error")
+    arrow(ax, (0.295, 0.56), (0.17, 0.54), rad=0.3)
+    arrow(ax, (0.295, 0.13), (0.12, 0.38), rad=-0.35)
+    arrow(ax, (0.505, 0.5), (0.575, 0.5)); arrow(ax, (0.505, 0.18), (0.575, 0.18))
+    arrow(ax, (0.785, 0.5), (0.83, 0.42)); arrow(ax, (0.785, 0.18), (0.83, 0.26))
+    plt.show()
+
+# %% slideshow={"slide_type": "subslide"}
+harness_flow()
+
+# %% slideshow={"slide_type": "subslide"}
+harness_failures()
+
+# %% [markdown]
+# **Transfer:** put the guards in the harness, not in the prompt. A prompt that says "ignore
+# follow-up length" still shows it to the model; text that never contains it cannot leak it. And
+# every silent default is a tie: count how often the parser fell back to 50.
+
 # %% [markdown] slideshow={"slide_type": "slide"}
 # ## 5 · Why a weak ranker helps: it is the error correlation
 # Two simulated rankers of the same true risk. The tabular one is strong. The LLM one is weaker
@@ -270,7 +343,7 @@ plt.show()
 # standalone score. A standalone gate would have thrown the LLM away.
 
 # %% [markdown] slideshow={"slide_type": "slide"}
-# ## 6 · Check orthogonality before spending API calls
+# ## 6 · Check rank correlation before spending API calls
 # Scoring every patient costs two LLM calls each. Two cheap diagnostics, both printed by our
 # blend script, say early whether a new ranker is worth it:
 # - **Spearman ρ** between its ranks and the base ranks: lower means more new information.
@@ -317,7 +390,14 @@ from IPython.display import Markdown
 if cv or lb:
     md = "| source | model | score |\n|---|---|---|\n"
     label = {"cv": "10-fold CV, as run", "cv_clean": "10-fold CV, window-free", "proxy": "CV leak probe"}
-    md += "".join(f"| {label.get(r['stage'], r['stage'])} | {r['model']} | {float(r['weighted']):.4f} |\n" for r in cv)
+    def row(r):                                      # cv_helm_<llm>_<prompt> rows reuse GPT-OSS model names
+        st, m = r["stage"], r["model"]
+        if st.startswith("cv_helm"):
+            llm = next((n for k, n in (("nemotron", "Nemotron"), ("medgemma", "MedGemma")) if k in st), "GPT-OSS")
+            m = m.replace("GPT-OSS", llm) + (", joint prompt" if st.endswith("joint") else "")
+            st = "cv_clean"
+        return f"| {label.get(st, st)} | {m} | {float(r['weighted']):.4f} |\n"
+    md += "".join(row(r) for r in cv if r["model"] != "window-free base")   # same as the window-free blend row
     md += "".join(f"| leaderboard | {r['submission']} | {float(r['public_score']):.4f} |\n" for r in lb)
     note = ("\n*CV as run reads follow-up length, a leak that section 8 dissects. The window-free rows"
             " drop every feature computed over the observation window.*") if cv else ""
@@ -652,7 +732,7 @@ display(Markdown(md))
 
 # %% [markdown] slideshow={"slide_type": "slide"}
 # ## Generalising the idea
-# | Setting | Strong base | Orthogonal ranker | Combine by |
+# | Setting | Strong base | Candidate ranker | Combine by |
 # |---|---|---|---|
 # | Clinical survival (this talk) | gradient-boosted AFT | LLM reading a clinical summary | rank blend |
 # | Credit or churn risk | boosted trees on tabular data | LLM over notes or transcripts | rank blend |
