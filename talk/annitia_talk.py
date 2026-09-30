@@ -236,7 +236,8 @@ display(HTML(f"<div style='display:flex;gap:1.5em'>{col(lines[:cut])}{col(lines[
 print(SCORE_PROMPT_HEPATIC.split("---", 1)[1].format(cot_instruction="").strip())
 
 # %% [markdown]
-# The model is GPT-OSS 120B, served through Ollama. Its 0-100 outputs are treated as **rankings**,
+# The model is GPT-OSS 120B on Ollama's **cloud** endpoint (`gpt-oss:120b-cloud`), so the text left
+# the machine; only MedGemma ran locally. Its 0-100 outputs are treated as **rankings**,
 # not probabilities, which is all a C-index needs.
 
 # %% [markdown] slideshow={"slide_type": "subslide"}
@@ -273,7 +274,7 @@ def harness_flow():
                               ("Strip follow-up length:\nvisit counts, age range", LEAK))):
         box(ax, x, top, t, fc)
     for x, (t, fc) in zip(X[::-1], (("Prompt\nsplit: one per endpoint\njoint: both at once", PLAIN),
-                                    ("LLM, temperature 0\nOllama or OpenRouter\nreasoning on or off", MODEL),
+                                    ("LLM, temperature 0\nOllama (local or cloud)\nor OpenRouter", MODEL),
                                     ("Parse JSON\nclip to 0-100\nmissing key -> 50", PLAIN),
                                     ("Append row, flush\nrerun resumes", SAFE))):
         box(ax, x, low, t, fc)
@@ -740,7 +741,7 @@ display(Markdown(md))
 # | Triage and alerting | rules and thresholds | an LLM reading free-text reports | ordered escalation |
 
 # %% [markdown] slideshow={"slide_type": "slide"}
-# ## Takeaways for Ghanaian researchers
+# ## Takeaways
 # - **Start with a model you can run yourself.** MedGemma 1.5 (3.3 GB) scored all 1,253 patients on
 #   a laptop in about 35 minutes, and no record left the machine.
 # - **Test cheaply before you pay.** Score three patients first, then check rank correlation with your
