@@ -1,6 +1,0 @@
-# Keep out of the talk repo: photos of people, and an LLM-written review with known errors.
-assets/
-talk_review_gemini.md
-__pycache__/
-node_modules/
-pptx/build/

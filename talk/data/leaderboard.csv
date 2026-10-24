@@ -1,9 +1,0 @@
-submission,public_score
-Tabular base: 10-seed XGB AFT + CatBoost (alone),0.89379
-Claude Haiku HeLM (alone),0.75275
-Tabular base + Haiku HeLM at weight 0.05,0.89834
-EfficientNet-B0 Cox fine-tune (alone),0.84426
-Tabular base + EfficientNet-B0 at weight 0.02,0.89665
-GPT-OSS 120B split-endpoint HeLM (alone),0.79186
-EfficientNet base + GPT-OSS HeLM at weight 0.07,0.90223
-Final two-stage: base + (EfficientNet + GPT-OSS split),0.90364
