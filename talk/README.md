@@ -15,6 +15,11 @@ challenge CSV, a submission, out-of-fold predictions or `reference_archive/` rai
 
 - `annitia_talk.py`: the source (jupytext percent format), the file to review and edit
 - `annitia_talk.ipynb`: generated from it and executed headless for verification
+- `patient_cards.py`: draws the three synthetic patients on the data slide (pictogram, FibroScan trajectory, follow-up lane)
+- `tree_card.py`: draws one fitted XGBoost tree as a flowchart, with Patient A's path through it (section 3, and the deck's tree slide)
+- `blur.css`: blurs each slide's points until you press next (reveal fragments); `print.css` keeps the PDF sharp
+- `annitia_talk_recap.pptx`: the PowerPoint deck with 24 visible slides, including two animated recap slides, plus 2 hidden backups. The original `annitia_talk.pptx` is preserved. Both open in Keynote. Built by `pptx/`
+- `speaker_script.md`: the timed rehearsal script; `speaker_script.css` is its A4 print style and `speaker_script.pdf` is the printable copy
 - `export_scores.py`: runs the repo's own cross-validation and writes `data/cv_scores.csv`
 - `helm_train_scores.py`: scores every training patient with an LLM (split or joint prompt;
   Ollama or OpenRouter). Per-patient scores stay in the git-ignored `../data/`
@@ -24,14 +29,38 @@ challenge CSV, a submission, out-of-fold predictions or `reference_archive/` rai
 pip install -r talk/requirements.txt
 jupytext --to ipynb talk/annitia_talk.py
 python -m nbconvert --execute --to notebook --inplace talk/annitia_talk.ipynb
-cd talk && python -m nbconvert --to slides annitia_talk.ipynb        # annitia_talk.slides.html
-# PDF handout: inject print.css, then print one slide per page with headless Chrome
-python3 -c "from pathlib import Path; h=Path('annitia_talk.slides.html').read_text(); Path('annitia_talk.print.html').write_text(h.replace('</head>', '<style>'+Path('print.css').read_text()+'</style></head>', 1))"
+cd talk && python -m nbconvert --to slides --SlidesExporter.reveal_scroll=True annitia_talk.ipynb   # annitia_talk.slides.html; tall code slides scroll
+# blur: inject blur.css into the slides (each later point is blurred until the next key press)
+python3 -c "from pathlib import Path; p=Path('annitia_talk.slides.html'); p.write_text(p.read_text().replace('</head>', '<style>'+Path('blur.css').read_text()+'</style></head>', 1))"
+# PDF handout: inject print.css and one page per slide (not per blur step), then print with headless Chrome
+python3 -c "from pathlib import Path; h=Path('annitia_talk.slides.html').read_text().replace('Reveal.initialize({', 'Reveal.initialize({pdfSeparateFragments: false,', 1); Path('annitia_talk.print.html').write_text(h.replace('</head>', '<style>'+Path('print.css').read_text()+'</style></head>', 1))"
 "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome" --headless=new --no-pdf-header-footer \
   --virtual-time-budget=20000 --print-to-pdf=annitia_talk.pdf "file://$PWD/annitia_talk.print.html?print-pdf"
 rm annitia_talk.print.html
 python -m unittest test_talk_data_safety.py
 ```
+
+**PowerPoint deck.** `pptx/build_deck.js` writes `annitia_talk.pptx` by default, or the path given in `PPTX_OUT`. Slide headlines and speaker notes come from
+`speaker_track.md`, numbers from `pptx/build/data.json`, and the images from `pptx/figures.py`, which reads this
+notebook's saved outputs and `data/*.csv`. Edit the track, not the pptx, to change a headline or a note.
+
+```bash
+cd talk/pptx && npm install                       # once
+python3 figures.py                                # data.json and images, after the notebook is executed
+PPTX_OUT=../annitia_talk_recap.pptx NODE_PATH=node_modules node build_deck.js
+# printable rehearsal script
+pandoc ../speaker_script.md --standalone --self-contained --css=../speaker_script.css -o /tmp/annitia_speaker_script.html
+"/Applications/Google Chrome.app/Contents/MacOS/Google Chrome" --headless --no-pdf-header-footer \
+  --print-to-pdf=../speaker_script.pdf file:///tmp/annitia_speaker_script.html
+```
+
+In the notebook, `slideshow` cells typed `fragment` are the blurred points; plain Jupyter ignores them, so the code walkthrough runs as before. In the deck, `step(s)` in `build_deck.js` marks where a new point starts, and `finish()` writes those steps as click-to-fade
+animations (PowerPoint and Keynote have no blur entrance). `finish()` also repairs the chart workbooks pptxgenjs writes,
+which Keynote otherwise drops.
+
+The map slide shows thumbnails of three slides. Render the recap deck to a PDF, cut pages 11, 18 and 24 with
+`pdftoppm -jpeg -r 60 -f N -l N -singlefile deck.pdf build/thumbs/N`, then build again. `SHOW_HIDDEN=1` keeps the
+backup slides visible for previews. `build_deck.js` reads the pptx skill's theme helper from `PPTX_SKILL`.
 
 **Real numbers.** Without them, the hook chart and the results table use the synthetic cohort and
 say so. To add them:
@@ -58,11 +87,11 @@ say so. To add them:
 clear: resolution, multiplicity, mechanism, ceiling and replication. They are applied to our own
 upload decisions. The public leaderboard scored 30% of the 423 test patients, about 127.
 
-**Timing (50 min, 47 handout pages):**
+**Timing (50 min, 49 handout pages):**
 - hook and the argument: 3 min
 - objective and rank blending: 3 min
 - data, the column dictionary and the leakage check: 4 min
-- tabular base: 2 min
+- tabular base, and Patient A's path through one tree: 3 min
 - serializing a patient, the prompts and the harness: 4 min
 - why a weak ranker helps: 5 min
 - rank-correlation checks: 2 min
@@ -71,7 +100,7 @@ upload decisions. The public leaderboard scored 30% of the 423 test patients, ab
 - the CV leak, its fix and the blend weight: 4 min
 - replication, other LLMs and the scorecard: 6 min
 - limits, takeaways and the checklist: 4 min
-- Q&A: 5 min
+- Q&A: 4 min
 
 If short on time, skip the synthetic replication check and the two-stage blend detail.
 

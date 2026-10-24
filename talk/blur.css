@@ -1,0 +1,7 @@
+/* Blur the points not yet reached. Each reveal fragment un-blurs on the next key press. */
+.reveal .fragment { opacity: 1 !important; visibility: visible !important; filter: blur(14px);
+  pointer-events: none; user-select: none; transition: filter .45s ease; }
+.reveal .fragment.visible { filter: none; pointer-events: auto; user-select: auto; }
+/* A list split into one fragment per item keeps the spacing of a single list. */
+.reveal .fragment > .jp-MarkdownCell { padding-top: 0; padding-bottom: 0; }
+.reveal .fragment .jp-RenderedMarkdown > :is(ol, ul):only-child { margin-top: 0; margin-bottom: 0; }

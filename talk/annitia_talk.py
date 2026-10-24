@@ -11,11 +11,11 @@
 # ---
 
 # %% [markdown] slideshow={"slide_type": "slide"}
-# # LLM Risk Rankers and Agentic Scaffolding for Liver Disease Survival Modeling
+# # LLM Risk Rankers and Agentic Scaffolding
 #
-# A case study: the ANNITIA 2026 challenge. Predict major hepatic events and all-cause death
-# from irregular longitudinal records of MASLD patients (metabolic dysfunction-associated
-# steatotic liver disease).
+# A case study for Liver Disease Survival Modeling: the ANNITIA 2026 challenge. Predict major
+# hepatic events and all-cause death from irregular longitudinal records of MASLD patients
+# (metabolic dysfunction-associated steatotic liver disease).
 #
 # *Every cell that runs here uses a synthetic cohort or our own aggregate scores. No challenge
 # record appears in this notebook, and a guard enforces that.*
@@ -55,15 +55,32 @@ C = S.cohort(2000, seed=0)                          # the synthetic cohort used 
 # on its own. On the leaderboard it seemed to improve a strong tabular ensemble, because it makes
 # **different mistakes**. This talk shows why that was plausible, and how a leak-free
 # replication overturned it.
-#
+
+# %% [markdown] slideshow={"slide_type": "fragment"}
 # 1. **Objective:** the metric only sees order, so we blend ranks.
+
+# %% [markdown] slideshow={"slide_type": "fragment"}
 # 2. **Data:** wide, irregular, censored records.
+
+# %% [markdown] slideshow={"slide_type": "fragment"}
 # 3. **Tabular base:** XGBoost AFT and CatBoost SurvivalAft.
+
+# %% [markdown] slideshow={"slide_type": "fragment"}
 # 4. **Serializing a patient:** from a wide row to a clinical summary, and the harness around the LLM.
+
+# %% [markdown] slideshow={"slide_type": "fragment"}
 # 5. **Why a weak ranker helps:** error correlation is the lever.
+
+# %% [markdown] slideshow={"slide_type": "fragment"}
 # 6. **Checking rank correlation** before spending API calls.
+
+# %% [markdown] slideshow={"slide_type": "fragment"}
 # 7. **The two-stage blend** we submitted.
-# 8. **False-positive gates:** five criteria, applied to our own decisions.
+
+# %% [markdown] slideshow={"slide_type": "fragment"}
+# 8. **False-positive gates:** three tests, applied to our own decisions.
+
+# %% [markdown] slideshow={"slide_type": "fragment"}
 # 9. **Limits** and honest reporting.
 
 # %% slideshow={"slide_type": "slide"}
@@ -88,7 +105,7 @@ ax.tick_params(axis="y", labelsize=8)
 ax.set_title(f"Hook: light bars alone, orange bars blended  ({src})")
 plt.show()
 
-# %% [markdown]
+# %% [markdown] slideshow={"slide_type": "fragment"}
 # On the leaderboard, GPT-OSS alone scored **0.792**, far below the tabular base at **0.894**.
 # Blended at a small rank weight, it gave this pipeline's best score, **0.904**. Section 8 tests
 # whether that gain was real.
@@ -111,7 +128,7 @@ raw = 0.5 * tab + 0.5 * llm                          # llm lives on 0-100, tab o
 print(f"\nraw 50/50 average    {cidx(ev, t, raw):.4f}   <- mostly the LLM, by scale alone")
 print(f"rank 50/50 average   {cidx(ev, t, rank_blend({'tab': tab, 'llm': llm}, {'tab': .5, 'llm': .5})):.4f}")
 
-# %% [markdown]
+# %% [markdown] slideshow={"slide_type": "fragment"}
 # **Transfer:** when the metric is a ranking metric, blend ranks. Then models with
 # incompatible outputs (log-times, hazards, 0-100 LLM scores) can be combined safely.
 
@@ -120,6 +137,14 @@ print(f"rank 50/50 average   {cidx(ev, t, rank_blend({'tab': tab, 'llm': llm}, {
 # One row per patient, up to 22 visits, each with biomarkers such as ALT, platelets, FibroScan
 # stiffness and FibroTest. Visits are irregular, non-invasive tests are often missing, and most
 # patients never have the event (right censoring).
+
+# %% [markdown] slideshow={"slide_type": "subslide"}
+# ### Each patient's record has its own length, gaps and ending
+
+# %% slideshow={"slide_type": "fragment"}
+import patient_cards as PC
+three = PC.pick(C)
+PC.draw(three)
 
 # %% [markdown] slideshow={"slide_type": "subslide"}
 # ### What each column means
@@ -162,7 +187,7 @@ plt.show()
 print(f"hepatic events {C.hep_event.mean():.1%} | deaths {C.death_event.mean():.1%} | censored for both "
       f"{(~C.hep_event & ~C.death_event).mean():.1%}")
 
-# %% [markdown]
+# %% [markdown] slideshow={"slide_type": "fragment"}
 # **Leakage trap:** visit count and follow-up length encode the outcome. The pipeline drops these
 # label proxies and masks visits after the event before building features.
 
@@ -202,7 +227,7 @@ whole_window = [c for c in X.columns if c.endswith(("_last", "_slope")) or c == 
 print("summaries over the whole follow-up window:"); fit_and_score(list(X.columns))
 print("baseline visit only:");                        fit_and_score([c for c in X.columns if c not in whole_window])
 
-# %% [markdown]
+# %% [markdown] slideshow={"slide_type": "fragment"}
 # A model that beats the **true risk** is reading the answer. Follow-up stops at the event, so
 # last values, slopes and even whether a slope exists all encode how long follow-up lasted. The
 # baseline-only model sits just under the truth, as an honest model should.
@@ -211,6 +236,35 @@ print("baseline visit only:");                        fit_and_score([c for c in 
 # kept `Age_first` and `Age_last`, and their difference *is* the follow-up time. Section 8 shows
 # what that did to our CV. The loader now drops every window feature. **Transfer:** compare every model against an oracle or a baseline-only model.
 
+# %% [markdown] slideshow={"slide_type": "subslide"}
+# ### Patient A, as the trees read her record
+# A boosted tree model adds up hundreds of small flowcharts of yes/no questions. This is the first
+# tree of the honest model, which sees only the first visit, and the path Patient A takes through
+# it. She is a test patient, so the trees never trained on her.
+
+# %% slideshow={"slide_type": "fragment"}
+import tree_card as TC
+first = [c for c in X.columns if c not in whole_window]   # the honest model
+Xtr, Xte, _, _ = transform_matrices(X.loc[tr, first], X.loc[te, first])
+ytr = ystruct(C.hep_event[tr], C.hep_time[tr])
+with contextlib.redirect_stderr(io.StringIO()):
+    xgb_m, cat_m = fit_xgb(Xtr, ytr, seed=0), fit_cat(Xtr, ytr, seed=0)
+a = three["A"].name
+assert te[a]                                   # Patient A was held out
+print(TC.draw(xgb_m.booster, Xte.loc[a]))      # XGBoost routes her itself
+risk = pd.Series(rank_blend({"xgb": xgb_m(Xte), "cat": cat_m(Xte)},
+                            {"xgb": .5, "cat": .5}), Xte.index)
+n_xgb, n_cat = xgb_m.booster.num_boosted_rounds(), cat_m.model.tree_count_
+print(f"XGBoost {n_xgb} trees + CatBoost {n_cat} trees, rank blended: "
+      f"Patient A is riskier than {(risk < risk[a]).mean():.0%} "
+      f"of the {len(risk)} test patients")
+
+# %% [markdown] slideshow={"slide_type": "fragment"}
+# One tree is a weak guess. Boosting adds trees one at a time, each fitted to the mistakes of the
+# trees before it, and CatBoost grows its own set. **Transfer:** to see what a tree model reads,
+# walk one patient through one of its trees: `booster.predict(dmatrix, pred_leaf=True)` names the
+# end each tree sends them to.
+
 # %% [markdown] slideshow={"slide_type": "slide"}
 # ## 4 · Serializing a patient for an LLM
 # The HeLM idea (Belyaeva et al., 2023): give a language model a patient's record as text and
@@ -218,10 +272,10 @@ print("baseline visit only:");                        fit_and_score([c for c in 
 # direction words, reference thresholds and comorbidities.
 
 # %% slideshow={"slide_type": "subslide"}
-n_visits = C.filter(regex=r"^Age_v\d+$").notna().sum(axis=1)
-sick = C[C.hep_event & (n_visits >= 5)].sort_values("true_hep").iloc[-1]
+sick = three["A"]                                           # Patient A, from the data section
 import html
 from IPython.display import HTML
+display(HTML("<p style='margin:0 0 0.3em'><b>Patient A</b>, as the LLM reads the record</p>"))
 lines = serialize_patient(sick, _fib4(sick)).splitlines()   # the exact function used for the submission
 cut = lines.index("Liver biochemistry:")                    # two columns so it fits on one slide
 col = lambda ls: f"<pre style='font-size:0.45em;margin:0'>{html.escape(chr(10).join(ls))}</pre>"
@@ -235,7 +289,7 @@ display(HTML(f"<div style='display:flex;gap:1.5em'>{col(lines[:cut])}{col(lines[
 # %% slideshow={"slide_type": "subslide"}
 print(SCORE_PROMPT_HEPATIC.split("---", 1)[1].format(cot_instruction="").strip())
 
-# %% [markdown]
+# %% [markdown] slideshow={"slide_type": "fragment"}
 # The model is GPT-OSS 120B on Ollama's **cloud** endpoint (`gpt-oss:120b-cloud`), so the text left
 # the machine; only MedGemma ran locally. Its 0-100 outputs are treated as **rankings**,
 # not probabilities, which is all a C-index needs.
@@ -309,7 +363,7 @@ harness_flow()
 # %% slideshow={"slide_type": "subslide"}
 harness_failures()
 
-# %% [markdown]
+# %% [markdown] slideshow={"slide_type": "fragment"}
 # **Transfer:** put the guards in the harness, not in the prompt. A prompt that says "ignore
 # follow-up length" still shows it to the model; text that never contains it cannot leak it. And
 # every silent default is a tie: count how often the parser fell back to 50.
@@ -339,7 +393,7 @@ plt.xlabel("weight on the LLM ranks"); plt.ylabel("C-index (hepatic)"); plt.lege
 plt.title("Independent mistakes: a weak model adds signal. Shared mistakes: it only adds noise.")
 plt.show()
 
-# %% [markdown]
+# %% [markdown] slideshow={"slide_type": "fragment"}
 # **Transfer:** judge a candidate member by what it adds **to the ensemble**, not by its
 # standalone score. A standalone gate would have thrown the LLM away.
 
@@ -413,12 +467,20 @@ else:
 # leaderboard, and it is **deterministic**: re-uploading a file gives the identical score. So the
 # risk is not measurement noise. It is overfitting a fixed sample of **127 patients** (30% of 423).
 #
-# A change passes only if it clears all five criteria:
-# 1. **Resolution:** the gain beats 2 paired standard errors on the gate's own sample.
-# 2. **Multiplicity:** it beats the best of K null tries, about SE·√(2 ln K).
-# 3. **Mechanism:** it is no larger than error independence can deliver.
-# 4. **Ceiling:** the score stays below what is attainable.
-# 5. **Replication:** it shows up on independent evidence.
+# A change passes only if it clears three tests:
+
+# %% [markdown] slideshow={"slide_type": "fragment"}
+# 1. **Is the gain bigger than the noise?**
+#    *Resolution:* it beats 2 paired standard errors on the gate's own sample.
+#    *Multiplicity:* it beats the best of K null tries, about SE·√(2 ln K).
+
+# %% [markdown] slideshow={"slide_type": "fragment"}
+# 2. **Is it too good to be true?**
+#    *Mechanism:* it is no larger than error independence can deliver.
+#    *Ceiling:* the score stays below what is attainable.
+
+# %% [markdown] slideshow={"slide_type": "fragment"}
+# 3. **Does it replicate?** It shows up on independent evidence.
 
 # %% slideshow={"slide_type": "skip"}
 import gates as G
@@ -439,9 +501,9 @@ def weighted_se(s_a, s_c, w, r=0.3, n=N_PUBLIC):
     return float(np.sqrt(0.49 * se["hep"] ** 2 + 0.09 * se["death"] ** 2))
 
 # %% [markdown] slideshow={"slide_type": "subslide"}
-# ### 1 · Resolution: how small a gain can 127 patients see?
+# ### Test 1, noise · Resolution: how small a gain can 127 patients see?
 
-# %%
+# %% slideshow={"slide_type": "fragment"}
 n_ev = round(RATES["hep"] * N_PUBLIC)
 print(f"event rates {RATE_SRC}: hepatic {RATES['hep']:.0%}, death {RATES['death']:.0%}"
       f" -> about {n_ev} hepatic events in the public sample")
@@ -452,14 +514,14 @@ for name, n in (("public", N_PUBLIC), ("private", N_TEST - N_PUBLIC), ("whole te
     se = weighted_se(s_base, s_oss, 0.07, n=n)
     print(f"  {name:10s} n = {n:3d}: SE {se:.4f}, credible gain {2 * se:.4f}")
 
-# %% [markdown]
+# %% [markdown] slideshow={"slide_type": "fragment"}
 # A paired difference is far tighter than a single score. With about five hepatic events in the
 # public sample, a credible gain still needs **about 0.01**.
 
 # %% [markdown] slideshow={"slide_type": "subslide"}
-# ### 2 · Multiplicity: the best of many tries looks good by construction
+# ### Test 1, noise · Multiplicity: the best of many tries looks good by construction
 
-# %%
+# %% slideshow={"slide_type": "fragment"}
 se_ref = weighted_se(s_base, s_oss, 0.07)
 for k in (5, 30, 272):
     print(f"K = {k:3d} tries on one sample -> typical best null gain {G.null_max_gain(se_ref, k):.4f}")
@@ -480,13 +542,13 @@ while len(optimism) < 100:
 print(f"\npublic winner is also the private winner in {hits}% of splits;"
       f" its public score is inflated by {np.mean(optimism):+.4f} on average")
 
-# %% [markdown]
+# %% [markdown] slideshow={"slide_type": "fragment"}
 # **Real case:** the platform marked `submission (7)` best public at 0.9308 and
-# `new_rank_ensemble` best private, listed at 0.9301. We uploaded 272 times, so the public
+# `new_rank_ensemble` best private, listed at 0.9301. We made 272 scored uploads, so the public
 # winner being the wrong pick is the expected outcome, not bad luck.
 
 # %% [markdown] slideshow={"slide_type": "subslide"}
-# ### 3 · Mechanism: how much gain can complementarity deliver?
+# ### Test 2, too good to be true · Mechanism: how much gain can complementarity deliver?
 # Model each ranker as truth plus noise of sd *s*. For two rankers with error correlation *r*,
 # the best blend puts value weight **(s₁² − r s₁s₂) / (s₁² + s₂² − 2r s₁s₂)** on the second, and
 # its noise variance is **s₁²s₂²(1 − r²) / (s₁² + s₂² − 2r s₁s₂)**. Each standalone C-index fixes
@@ -506,7 +568,7 @@ for shared in (0.0, 0.3, 0.6):
     print(f"error corr {shared:.1f}: predicted best gain {predicted:+.4f} at w = {w_star:.2f}"
           f" | simulated {simulated:+.4f}")
 
-# %% [markdown]
+# %% [markdown] slideshow={"slide_type": "fragment"}
 # The formula tracks the simulation and overstates it by about 0.001. The coarse LLM scores add
 # ties that the Gaussian model does not describe. So the predicted gain is an **upper bound**.
 
@@ -529,13 +591,13 @@ axs[0].set_ylabel("gain in C-index"); axs[1].legend(fontsize=7)
 plt.suptitle("Observed gains exceed what even independent errors predict at the weight used", fontsize=10)
 plt.show()
 
-# %% [markdown]
+# %% [markdown] slideshow={"slide_type": "fragment"}
 # At the weights we used, both observed gains are **larger than the prediction even at r = 0**,
 # as printed above. Independence cannot explain all of either gain. The rest is most likely noise
 # from the 127-patient sample.
 
 # %% [markdown] slideshow={"slide_type": "subslide"}
-# ### 4 · Ceiling and 5 · Replication
+# ### Test 2 · Ceiling, and test 3 · Replication
 # **Ceiling.** A score above what is attainable is a leak, not a win. Compare against the true
 # risk in simulation, a baseline-only model, or a red-flag threshold. Section 2 showed a model at
 # 0.914 against a true risk of 0.825. `ablation_finetune_efficientnet.py` flags CV above 0.947.
@@ -570,7 +632,7 @@ if "xgb + cat rank blend" in cv_by:
 else:
     print("run talk/export_scores.py on the challenge data to fill this slide")
 
-# %% [markdown]
+# %% [markdown] slideshow={"slide_type": "fragment"}
 # **Our CV was a false-positive gate.** The follow-up span alone outscores the whole model, so the
 # model is mostly reading how long patients were followed. The CV also sits above the repo's own red
 # flag. The leaderboard gap alone could not show this: one public score is too noisy. The leak
@@ -584,7 +646,7 @@ else:
 # The pipeline blends XGBoost and CatBoost 50/50 because the CV as run favoured it. Without the
 # leak, XGBoost alone looks better. Is that a finding, or a second false positive?
 
-# %%
+# %% slideshow={"slide_type": "fragment"}
 by = {(r["stage"], r["model"]): float(r["weighted"]) for r in cv}
 for stage, sfx, label in (("cv", "", "CV as run"), ("cv_clean", ", window-free", "window-free CV")):
     vals = [by.get((stage, m + sfx)) for m in ("xgb (10 seeds)", "cat (10 seeds)", "xgb + cat rank blend")]
@@ -604,7 +666,7 @@ if wf:
     for name, est, se in views:              # K = 3: picked among XGB, Cat and blend after seeing CV
         print(f"{name:17s} {est:+.4f} ± {se:.4f} ({est / se:.1f} SE) -> {G.verdict(est, se, 3, np.inf, False)}")
 
-# %% [markdown]
+# %% [markdown] slideshow={"slide_type": "fragment"}
 # **Suggestive, not yet credible.** The leaky CV approved 50/50 on a margin of 0.0008. Without
 # the leak, XGBoost looks better, but the evidence is mixed: the fold mean clears the bars, the
 # patient bootstrap does not, and XGBoost wins only about half the folds. We also picked this
@@ -614,7 +676,7 @@ if wf:
 # %% [markdown] slideshow={"slide_type": "subslide"}
 # ### A cheap replication check
 
-# %%
+# %% slideshow={"slide_type": "fragment"}
 tab, llm = S.rankers(cal_syn[0], seed=21, shared=0.1)
 folds = np.array_split(np.random.default_rng(21).permutation(len(tab)), 10)
 blend = 0.93 * _rank01(tab) + 0.07 * _rank01(llm)
@@ -627,7 +689,7 @@ print(f"blend beats base in {k} of 10 folds; sign-test p = {binomtest(k, 10, 0.5
 # GPT-OSS scored all 1,253 training patients zero-shot. Its text drops follow-up length and
 # post-event visits, like the base. The blend weight, **0.07**, is the submitted one, fixed in advance.
 
-# %%
+# %% slideshow={"slide_type": "fragment"}
 helm = {r["model"]: r for r in cv if r["stage"] == "cv_helm"}
 fold_rows = [r for r in csv_rows("cv_folds.csv") if r["comparison"] == "helm_blend_vs_base"]
 if helm:
@@ -648,7 +710,7 @@ if helm:
 else:
     print("run talk/helm_train_scores.py, then talk/helm_cv.py, to fill this slide")
 
-# %% [markdown]
+# %% [markdown] slideshow={"slide_type": "fragment"}
 # **It does not replicate.** The blend loses in most folds, as the mechanism predicts if the errors
 # correlate near 0.5. *Not an exact replay: window-free text, stricter masking, tabular base.*
 
@@ -658,7 +720,7 @@ else:
 # the model can reason about competing risks. Same text, same weight 0.07, same folds. GPT-OSS and
 # MedGemma 1.5 run with thinking off; Nemotron 3 Super runs with reasoning on.
 
-# %%
+# %% slideshow={"slide_type": "fragment"}
 tests = {r["comparison"]: r for r in csv_rows("cv_tests.csv")}
 runs = [("GPT-OSS split", "cv_helm", "helm_blend_vs_base"), ("GPT-OSS joint", "cv_helm_joint", "helm_joint_blend_vs_base")]
 runs += [(f"{label} {mode}", f"cv_helm_{name}_{mode}", f"helm_{name}_{mode}_blend_vs_base")
@@ -690,7 +752,7 @@ if shown <= 1:
 # %% [markdown] slideshow={"slide_type": "subslide"}
 # ### The scorecard: our own leaderboard decisions
 
-# %%
+# %% slideshow={"slide_type": "fragment"}
 # (decision, gain seen, K tries for that decision in the upload history, base C, added-model C, weight)
 decisions = [("Haiku HeLM into base", 0.89834 - 0.89379, 8, 0.8938, 0.7528, 0.05),
              ("EfficientNet into base", 0.89665 - 0.89379, 6, 0.8938, 0.8443, 0.02),
@@ -714,7 +776,7 @@ for name, gain, k, c_a, c_b, w in decisions:
            f" | {mech_txt} | **{v}** |\n")
 display(Markdown(md))
 
-# %% [markdown]
+# %% [markdown] slideshow={"slide_type": "fragment"}
 # **The honest reading:** with real event rates, every leaderboard decision falls within noise,
 # and the one we could replicate failed. Our CV as run failed the ceiling check, and the
 # window-free CV passes it. The weak-ranker mechanism is real. Here, the LLM's errors were too
@@ -722,13 +784,23 @@ display(Markdown(md))
 
 # %% [markdown] slideshow={"slide_type": "slide"}
 # ## 9 · Limits and honest reporting
+
+# %% [markdown] slideshow={"slide_type": "fragment"}
 # - **Uncalibrated:** the LLM scores rank patients. They are not risks, and are never reported as such.
+
+# %% [markdown] slideshow={"slide_type": "fragment"}
 # - **Cost and drift:** two calls per patient, and a hosted model can change under you. Store the
 #   raw scores and the model tag with each run.
+
+# %% [markdown] slideshow={"slide_type": "fragment"}
 # - **Replicated and failed:** scored on the training set, GPT-OSS at weight 0.07 slightly lowers
 #   the leak-free CV. Its leaderboard gain was noise on 127 patients.
+
+# %% [markdown] slideshow={"slide_type": "fragment"}
 # - **Small gate:** 127 public patients hold only a handful of hepatic events, so they resolve
 #   only gains larger than most of ours.
+
+# %% [markdown] slideshow={"slide_type": "fragment"}
 # - **Leaky CV:** the pipeline's CV reads follow-up length. Quote the window-free CV, 0.902, instead.
 
 # %% [markdown] slideshow={"slide_type": "slide"}
@@ -742,27 +814,61 @@ display(Markdown(md))
 
 # %% [markdown] slideshow={"slide_type": "slide"}
 # ## Takeaways
+
+# %% [markdown] slideshow={"slide_type": "fragment"}
 # - **Start with a model you can run yourself.** MedGemma 1.5 (3.3 GB) scored all 1,253 patients on
 #   a laptop in about 35 minutes, and no record left the machine.
+
+# %% [markdown] slideshow={"slide_type": "fragment"}
 # - **Test cheaply before you pay.** Score three patients first, then check rank correlation with your
 #   model and the number of distinct scores. Free API tiers allow about 1,000 requests a day, so plan
 #   runs around them and save after every call.
+
+# %% [markdown] slideshow={"slide_type": "fragment"}
 # - **Judge an LLM by what it adds to your model,** on your own held-out data, not by one leaderboard.
 #   127 patients could not tell our gain from noise.
+
+# %% [markdown] slideshow={"slide_type": "fragment"}
 # - **Look for leaks in your own features first.** Here, the gap between first and last visit ages
 #   alone scored 0.96.
+
+# %% [markdown] slideshow={"slide_type": "fragment"}
 # - **Know where your data goes.** Cloud and free endpoints may log prompts, so check the data terms
 #   before sending patient records.
 
 # %% [markdown] slideshow={"slide_type": "slide"}
 # ## The checklist
+
+# %% [markdown] slideshow={"slide_type": "fragment"}
 # - [ ] Is the metric a ranking metric? Then blend ranks, not raw scores.
+
+# %% [markdown] slideshow={"slide_type": "fragment"}
 # - [ ] Did I drop label proxies and mask data recorded after the event?
+
+# %% [markdown] slideshow={"slide_type": "fragment"}
 # - [ ] Does the serialized text carry trajectories and thresholds, not only last values?
+
+# %% [markdown] slideshow={"slide_type": "fragment"}
 # - [ ] Is each endpoint asked separately?
+
+# %% [markdown] slideshow={"slide_type": "fragment"}
 # - [ ] Is the candidate judged by its gain **in the ensemble**, not alone?
+
+# %% [markdown] slideshow={"slide_type": "fragment"}
 # - [ ] Did I check rank correlation and unique values before paying for every call?
+
+# %% [markdown] slideshow={"slide_type": "fragment"}
 # - [ ] Were blend weights fixed on a coarse grid and confirmed on held-out data?
+
+# %% [markdown] slideshow={"slide_type": "fragment"}
 # - [ ] Does the gain beat 2 paired SEs on the gate's sample, and the bar for K tries?
+
+# %% [markdown] slideshow={"slide_type": "fragment"}
 # - [ ] Is the gain no larger than error independence can deliver?
+
+# %% [markdown] slideshow={"slide_type": "fragment"}
 # - [ ] Is every number labelled measured, leaderboard or synthetic?
+
+# %% [markdown] slideshow={"slide_type": "fragment"}
+# **Questions or results:** polleronny2@gmail.com
+# <!-- add the repo link here after pushing -->
